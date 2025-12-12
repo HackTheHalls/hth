@@ -10,8 +10,16 @@
     <div class="game-container">
         <!-- Game Info Section -->
         <div class="game-info">
-            <div class="timer">timer: <span id="timer-value">3:00</span></div>
-            <div class="delivery-counter">delivery counter: <span id="delivery-count">4</span></div>
+            <div class="level-display">Level: <span id="level-value">1</span></div>
+            <div class="timer">Time: <span id="timer-value">3:00</span></div>
+            <div class="delivery-counter">Orders Left: <span id="delivery-count">3</span></div>
+            <div class="carrying-display" id="carrying-display">Carrying: nothing</div>
+        </div>
+        
+        <!-- Controls Info -->
+        <div class="controls-info">
+            <div>WASD/Arrows: Move</div>
+            <div>E: Interact</div>
         </div>
 
         <!-- Recipe/Order Card -->
@@ -35,7 +43,8 @@
                     <div class="recipe-item-name">Item: couch</div>
                     <div class="materials">
                         <div>2x wood</div>
-                        <div>4x metal</div>
+                        <div>1x metal</div>
+                        <div>1x fabric</div>
                     </div>
                 </div>
 
@@ -115,6 +124,6 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <script src="Script.js"></script>
 </body>
 </html>
