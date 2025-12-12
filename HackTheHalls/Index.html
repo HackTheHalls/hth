@@ -3,73 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <script src="Script.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #8b6f47 0%, #a0826d 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .game-container {
-            display: flex;
-            flex: 1;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .items-panel {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 8px;
-            width: 300px;
-        }
-
-        .item {
-            margin: 15px 0;
-            padding: 10px;
-            background: #f0e6d2;
-            border-radius: 5px;
-        }
-
-        .categories {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .category {
-            padding: 10px 20px;
-            background: #d4a574;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Elf Workshop Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <div class="game-container">
+        <!-- Game Info Section -->
+        <div class="game-info">
+            <div class="timer">timer: <span id="timer-value">3:00</span></div>
+            <div class="delivery-counter">delivery counter: <span id="delivery-count">4</span></div>
+        </div>
+
+        <!-- Recipe/Order Card -->
+        <div class="recipe-card">
+            <div class="recipe-scroll">
+                <!-- ==============================================
+                     TOY RECIPES - Add new toys here
+                     ============================================== -->
+                
+                <!-- Toy 1: Bench -->
+                <div class="recipe-item toy-bench">
+                    <div class="recipe-item-name">Item: bench</div>
+                    <div class="materials">
+                        <div>1x wood</div>
+                        <div>1x metal</div>
+                    </div>
+                </div>
+
+                <!-- Toy 2: Couch -->
+                <div class="recipe-item toy-couch">
+                    <div class="recipe-item-name">Item: couch</div>
+                    <div class="materials">
+                        <div>2x wood</div>
+                        <div>4x metal</div>
+                    </div>
+                </div>
+
+                <!-- ==============================================
+                     ADD NEW TOYS BELOW - Copy this template:
+                     
+                <div class="recipe-item toy-TOYNAME">
+                    <div class="recipe-item-name">Item: TOYNAME</div>
+                    <div class="materials">
+                        <div>Xx wood</div>
+                        <div>Xx metal</div>
+                        <div>Xx fabric</div>
+                    </div>
+                </div>
+                
+                     ============================================== -->
+
+            </div>
+        </div>
+
+        <!-- Put Area -->
+        <div class="put-area">
+            put area
+        </div>
+
+        <!-- Elf Character (placeholder) -->
+        <div class="elf">
+            <!-- Add elf image here -->
+        </div>
+
+        <!-- Resource Crafting Stations -->
+        <div class="resource-stations">
+            <!-- Wood Station -->
+            <div class="station" id="wood-station" data-resource="wood">
+                <div class="station-label">wood</div>
+                <div class="station-icon">
+                    <!-- Add crafting table image here -->
+                </div>
+            </div>
+
+            <!-- Metal Station -->
+            <div class="station" id="metal-station" data-resource="metal">
+                <div class="station-label">metal</div>
+                <div class="station-icon">
+                    <!-- Add crafting table image here -->
+                </div>
+            </div>
+
+            <!-- Fabric Station -->
+            <div class="station" id="fabric-station" data-resource="fabric">
+                <div class="station-label">fabric</div>
+                <div class="station-icon">
+                    <!-- Add crafting table image here -->
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 ADD NEW RESOURCE STATIONS HERE
+                 Copy this template:
+                 
+            <div class="station" id="RESOURCENAME-station" data-resource="RESOURCENAME">
+                <div class="station-label">RESOURCENAME</div>
+                <div class="station-icon">
+                    <!-- Add crafting table image here -->
+                </div>
+            </div>
+            
+                 ============================================== -->
+
+            <!-- Crafting Station -->
+            <div class="station" id="crafting-station" data-resource="crafting">
+                <div class="station-label">crafting</div>
+                <div class="station-icon">
+                    <!-- Add crafting table image here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
 </body>
 </html>
