@@ -1,0 +1,248 @@
+/* General Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: url('wood-texture.jpg') center/cover;
+    overflow: hidden;
+}
+
+.game-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+/* ==============================================
+   GAME INFO SECTION
+   ============================================== */
+
+.game-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c1810;
+    z-index: 10;
+}
+
+.timer {
+    margin-bottom: 10px;
+}
+
+.delivery-counter {
+    margin-bottom: 10px;
+}
+
+/* ==============================================
+   RECIPE/ORDER CARD SECTION
+   ============================================== */
+
+.recipe-card {
+    position: absolute;
+    top: 20px;
+    right: 300px;
+    background: white;
+    border: 3px solid #8b4513;
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+.santa-hat {
+    position: absolute;
+    top: -30px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+}
+
+.recipe-scroll {
+    background: #f4e4c1;
+    border: 2px solid #8b4513;
+    border-radius: 5px;
+    padding: 15px;
+    font-size: 18px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.recipe-item {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #8b4513;
+}
+
+.recipe-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.recipe-item-name {
+    font-weight: bold;
+    color: #8b4513;
+    font-size: 20px;
+}
+
+.materials {
+    margin-left: 10px;
+    margin-top: 5px;
+    color: #2c1810;
+}
+
+/* ==============================================
+   TOY-SPECIFIC STYLES
+   Add custom styles for specific toys here
+   ============================================== */
+
+.toy-bench .materials {
+    margin-left: 10px;
+}
+
+.toy-couch .materials {
+    margin-left: 10px;
+}
+
+/* TEMPLATE FOR NEW TOY:
+.toy-TOYNAME .materials {
+    margin-left: 10px;
+}
+*/
+
+/* ==============================================
+   PUT AREA
+   ============================================== */
+
+.put-area {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 250px;
+    height: 200px;
+    background: rgba(139, 69, 19, 0.3);
+    border: 3px dashed #8b4513;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c1810;
+    z-index: 10;
+}
+
+/* ==============================================
+   ELF CHARACTER
+   ============================================== */
+
+.elf {
+    position: absolute;
+    bottom: 250px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 150px;
+    z-index: 5;
+}
+
+.elf img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ==============================================
+   RESOURCE CRAFTING STATIONS
+   ============================================== */
+
+.resource-stations {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 50px;
+    z-index: 10;
+}
+
+.station {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.station:hover {
+    transform: scale(1.05);
+}
+
+.station:active {
+    transform: scale(0.98);
+}
+
+.station-label {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c1810;
+    margin-bottom: 10px;
+    text-transform: lowercase;
+}
+
+.station-icon {
+    width: 150px;
+    height: 150px;
+    background: #8b4513;
+    border: 3px solid #654321;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.station-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 7px;
+}
+
+/* Station Active State */
+.station.active .station-icon {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN (Optional)
+   ============================================== */
+
+@media (max-width: 1200px) {
+    .resource-stations {
+        padding: 0 20px;
+    }
+    
+    .station-icon {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .station-label {
+        font-size: 20px;
+    }
+}
+
+/* ==============================================
+   CUSTOM STYLES FOR NEW STATIONS
+   Add styles for new resource stations here
+   ============================================== */
+
+/* Example:
+#newresource-station .station-icon {
+    background: #customcolor;
+}
+*/
