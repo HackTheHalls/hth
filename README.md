@@ -1,2 +1,1 @@
-# hth
-we are hacking halls
+This is a Project for a college hackathon, we have had to settle on an idea and we chose to do a Christams themed Sant's Workshop Resource Simulator (Web Game). We have split up into teams to work on different aspects of the projects. 
