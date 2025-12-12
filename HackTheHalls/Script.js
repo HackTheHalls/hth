@@ -27,7 +27,8 @@ const gameState = {
         ArrowLeft: false,
         ArrowDown: false,
         ArrowRight: false,
-        e: false // Interaction key
+        e: false, // Interaction key (pickup/deposit/deliver)
+        c: false // Craft key
     },
     lastFrameTime: Date.now(),
     timerInterval: null,
@@ -286,15 +287,20 @@ function handleInteraction() {
         if (gameState.elf.carrying && gameState.elf.carrying.type !== 'crafted') {
             // Deposit material for crafting
             depositMaterialForCrafting(gameState.elf.carrying.resource);
-        } else if (!gameState.elf.carrying) {
-            // Try to pick up a crafted item
-            attemptCrafting();
         }
     } else {
         // Resource gathering station
         if (!gameState.elf.carrying) {
             gatherResource(nearbyStation.resource);
         }
+    }
+}
+
+function handleCraftKey() {
+    const nearbyStation = checkStationProximity();
+    if (!nearbyStation) return;
+    if (nearbyStation.resource === 'crafting') {
+        attemptCrafting();
     }
 }
 
@@ -308,6 +314,8 @@ function handleKeyDown(event) {
         
         if (event.key === 'e') {
             handleInteraction();
+        } else if (event.key === 'c') {
+            handleCraftKey();
         }
     }
 }
@@ -497,7 +505,9 @@ function initGame() {
     // Initialize station positions
     initStationPositions();
     
-    // Initialize elf position
+    // Initialize elf position (start near center)
+    gameState.elf.x = window.innerWidth / 2;
+    gameState.elf.y = window.innerHeight / 2;
     const elfElement = document.querySelector('.elf');
     elfElement.style.left = gameState.elf.x + 'px';
     elfElement.style.top = gameState.elf.y + 'px';
