@@ -12,12 +12,31 @@ const gameState = {
     elf: {
         x: 400,
         y: 300,
-        speed: 200, // pixels per second
-        carrying: null, // {type: 'resource', resource: 'wood'} or {type: 'crafted', toyName: 'bench'}
+        speed: 280, // pixels per second (faster)
+        carrying: null, // {type: 'resource', resource: 'wood'} or {type: 'crafted', toyName: 'train'}
         width: 60,
-        height: 60
+        height: 80
     },
     stations: {}, // Will store station positions
+    blockers: [], // Collision rectangles for stations
+    difficulty: null,
+    difficultySettings: {
+        easy: {
+            startOrders: 1,
+            increaseEveryLevels: 2,
+            singleQuantityChance: 0.7
+        },
+        medium: {
+            startOrders: 1,
+            increaseEveryLevels: 1,
+            singleQuantityChance: 0.5
+        },
+        hard: {
+            startOrders: 2,
+            increaseEveryLevels: 1,
+            singleQuantityChance: 0.4
+        }
+    },
     keys: {
         w: false,
         a: false,
@@ -41,37 +60,36 @@ const gameState = {
 // ==============================================
 
 const toyRecipes = {
-    bench: {
-        wood: 1,
-        metal: 1
-    },
-    couch: {
+    train: {
         wood: 2,
-        metal: 1,
-        fabric: 1
-    },
-    chair: {
-        wood: 2,
-        metal: 1
-    },
-    table: {
-        wood: 3,
         metal: 2
     },
-    bed: {
+    "christmas-tree": {
+        wood: 3,
+        fabric: 1
+    },
+    "gingerbread": {
+        wood: 1,
+        fabric: 1
+    },
+    teddy: {
+        wood: 1,
+        fabric: 3
+    },
+    nutcracker: {
         wood: 2,
-        fabric: 3,
-        metal: 1
+        metal: 2,
+        fabric: 1
     }
 };
 
 // Level configuration - defines difficulty progression
 const levelConfig = [
-    { requiredDeliveries: 3, timeLimit: 180, availableToys: ['bench'] },
-    { requiredDeliveries: 4, timeLimit: 150, availableToys: ['bench', 'chair'] },
-    { requiredDeliveries: 5, timeLimit: 150, availableToys: ['bench', 'chair', 'couch'] },
-    { requiredDeliveries: 6, timeLimit: 180, availableToys: ['bench', 'chair', 'couch', 'table'] },
-    { requiredDeliveries: 7, timeLimit: 180, availableToys: ['bench', 'chair', 'couch', 'table', 'bed'] }
+    { requiredDeliveries: 3, timeLimit: 180, availableToys: ['train'] },
+    { requiredDeliveries: 4, timeLimit: 150, availableToys: ['train', 'christmas-tree'] },
+    { requiredDeliveries: 5, timeLimit: 150, availableToys: ['train', 'christmas-tree', 'gingerbread'] },
+    { requiredDeliveries: 6, timeLimit: 180, availableToys: ['train', 'christmas-tree', 'gingerbread', 'teddy'] },
+    { requiredDeliveries: 7, timeLimit: 180, availableToys: ['train', 'christmas-tree', 'gingerbread', 'teddy', 'nutcracker'] }
 ];
 
 // ==============================================
@@ -108,6 +126,11 @@ function completeDelivery() {
     }
 }
 
+function getSingleQuantityChance() {
+    const d = gameState.difficulty || 'medium';
+    return gameState.difficultySettings[d].singleQuantityChance;
+}
+
 // ==============================================
 // LEVEL SYSTEM
 // ==============================================
@@ -126,6 +149,12 @@ function levelComplete() {
     const nextConfig = levelConfig[gameState.level - 1];
     gameState.timeLeft += nextConfig.timeLimit;
     
+    // Progress difficulty-based number of simultaneous orders
+    const settings = gameState.difficultySettings[gameState.difficulty || 'medium'];
+    if ((gameState.level - 1) % settings.increaseEveryLevels === 0) {
+        gameState.maxOrdersInQueue = Math.min(4, gameState.maxOrdersInQueue + 1);
+    }
+
     // Clear current orders and generate new ones
     gameState.orderQueue = [];
     generateInitialOrders();
@@ -147,17 +176,19 @@ function generateNewOrder() {
     if (gameState.orderQueue.length >= gameState.maxOrdersInQueue) {
         return;
     }
-    
     const currentConfig = levelConfig[gameState.level - 1];
-    const availableToys = currentConfig.availableToys;
-    const randomToy = availableToys[Math.floor(Math.random() * availableToys.length)];
-    
+    const availableToys = currentConfig.availableToys.slice();
+    // Prefer toys not already present to reduce duplicates
+    const inQueueNames = new Set(gameState.orderQueue.map(o => o.toyName));
+    const notInQueue = availableToys.filter(t => !inQueueNames.has(t));
+    const pool = notInQueue.length > 0 ? notInQueue : availableToys;
+    const randomToy = pool[Math.floor(Math.random() * pool.length)];
+
     const order = {
         toyName: randomToy,
         recipe: toyRecipes[randomToy],
         id: Date.now()
     };
-    
     gameState.orderQueue.push(order);
     updateOrderDisplay();
 }
@@ -217,7 +248,9 @@ function updateElfPosition(deltaTime) {
         dy *= 0.707;
     }
     
-    // Apply movement
+    // Apply movement with collision resolution
+    const prevX = elf.x;
+    const prevY = elf.y;
     elf.x += dx * elf.speed * deltaTime;
     elf.y += dy * elf.speed * deltaTime;
     
@@ -225,6 +258,8 @@ function updateElfPosition(deltaTime) {
     const margin = 50;
     elf.x = Math.max(margin, Math.min(window.innerWidth - margin - elf.width, elf.x));
     elf.y = Math.max(margin, Math.min(window.innerHeight - margin - elf.height, elf.y));
+
+    resolveCollisions(prevX, prevY);
     
     // Update visual position
     const elfElement = document.querySelector('.elf');
@@ -232,13 +267,58 @@ function updateElfPosition(deltaTime) {
     elfElement.style.top = elf.y + 'px';
 }
 
+function resolveCollisions(prevX, prevY) {
+    const elf = gameState.elf;
+    const elfRect = {
+        x: elf.x,
+        y: elf.y,
+        w: elf.width,
+        h: elf.height
+    };
+    for (const block of gameState.blockers) {
+        if (rectIntersect(elfRect, block)) {
+            // Resolve on the smallest overlap axis
+            const overlapX = Math.min(elfRect.x + elfRect.w - block.x, block.x + block.w - elfRect.x);
+            const overlapY = Math.min(elfRect.y + elfRect.h - block.y, block.y + block.h - elfRect.y);
+            if (overlapX < overlapY) {
+                if (elfRect.x < block.x) {
+                    elf.x -= overlapX;
+                } else {
+                    elf.x += overlapX;
+                }
+            } else {
+                if (elfRect.y < block.y) {
+                    elf.y -= overlapY;
+                } else {
+                    elf.y += overlapY;
+                }
+            }
+            elfRect.x = elf.x;
+            elfRect.y = elf.y;
+        }
+    }
+    // Update position after resolution
+    const elfElement = document.querySelector('.elf');
+    elfElement.style.left = elf.x + 'px';
+    elfElement.style.top = elf.y + 'px';
+}
+
+function rectIntersect(a, b) {
+    return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+    );
+}
+
 function checkStationProximity() {
     const elf = gameState.elf;
     const interactionDistance = 100;
     
     for (const [stationId, stationPos] of Object.entries(gameState.stations)) {
-        const dx = elf.x - stationPos.x;
-        const dy = elf.y - stationPos.y;
+        const dx = (elf.x + elf.width / 2) - stationPos.x;
+        const dy = (elf.y + elf.height / 2) - stationPos.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         const stationElement = document.getElementById(stationId);
@@ -397,8 +477,16 @@ function attemptCrafting() {
 }
 
 function updateCraftingTableDisplay() {
-    // This could show what's on the crafting table
-    console.log('Crafting table contents:', craftingTable);
+    const box = document.querySelector('.crafting-contents');
+    if (!box) return;
+    const entries = Object.entries(craftingTable).filter(([, amt]) => amt > 0);
+    if (entries.length === 0) {
+        box.textContent = '(empty)';
+        return;
+    }
+    box.innerHTML = entries
+        .map(([res, amt]) => `${amt}x ${res}`)
+        .join('<br>');
 }
 
 // ==============================================
@@ -406,10 +494,11 @@ function updateCraftingTableDisplay() {
 // ==============================================
 
 function deliverToy(toyName) {
-    // Find matching order
+    // Find one matching order
     const orderIndex = gameState.orderQueue.findIndex(order => order.toyName === toyName);
     
     if (orderIndex !== -1) {
+        // Remove only one entry (orders are single-unit)
         gameState.orderQueue.splice(orderIndex, 1);
         gameState.elf.carrying = null;
         updateCarryingDisplay();
@@ -453,6 +542,7 @@ function gameLoop() {
 
 function startTimer() {
     gameState.timerInterval = setInterval(() => {
+        // Timer always counts down regardless of list state
         if (gameState.timeLeft > 0) {
             gameState.timeLeft--;
             updateTimer();
@@ -486,16 +576,29 @@ function gameWon() {
 
 function initStationPositions() {
     const stations = document.querySelectorAll('.station');
+    gameState.blockers = [];
     stations.forEach(station => {
-        const rect = station.getBoundingClientRect();
+        const icon = station.querySelector('.station-icon') || station;
+        const rect = icon.getBoundingClientRect();
         const stationId = station.id;
         const resource = station.dataset.resource;
         
         gameState.stations[stationId] = {
             x: rect.left + rect.width / 2,
             y: rect.top + rect.height / 2,
-            resource: resource
+            resource: resource,
+            w: rect.width,
+            h: rect.height
         };
+
+        // Add smaller blocker for collision based on icon only (labels won't block)
+        const inset = Math.min(rect.width, rect.height) * 0.25; // shrink hitbox by 25%
+        gameState.blockers.push({
+            x: rect.left + inset,
+            y: rect.top + inset,
+            w: rect.width - inset * 2,
+            h: rect.height - inset * 2
+        });
     });
 }
 
@@ -512,8 +615,7 @@ function initGame() {
     elfElement.style.left = gameState.elf.x + 'px';
     elfElement.style.top = gameState.elf.y + 'px';
     
-    // Generate initial orders
-    generateInitialOrders();
+    // Defer orders until difficulty selected
     
     // Update UI
     updateTimer();
@@ -525,18 +627,35 @@ function initGame() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
     
-    // Start game loop
-    gameState.isGameRunning = true;
-    gameState.lastFrameTime = Date.now();
-    requestAnimationFrame(gameLoop);
-    
-    // Start timer countdown
-    startTimer();
+    // Don't start until difficulty chosen
     
     console.log('Game initialized!');
     console.log('Controls: WASD or Arrow Keys to move, E to interact');
     console.log('Initial state:', gameState);
 }
+// Rules overlay: proceed to difficulty on Enter
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const rules = document.getElementById('rules-overlay');
+        if (rules && rules.style.display !== 'none') {
+            rules.style.display = 'none';
+            const startOverlay = document.getElementById('start-overlay');
+            if (startOverlay) startOverlay.style.display = 'flex';
+        }
+    }
+});
+
+// Toggle recipe card open/closed
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'recipe-title') {
+        const card = document.getElementById('recipe-card');
+        const expanded = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        card.classList.toggle('closed', expanded);
+        const isClosed = expanded; // if it was expanded, we just closed it
+        document.body.classList.toggle('orders-closed', isClosed);
+    }
+});
 
 // ==============================================
 // START GAME WHEN PAGE LOADS
@@ -548,6 +667,37 @@ if (document.readyState === 'loading') {
 } else {
     initGame();
 }
+
+// Difficulty selection handlers
+function startGameWithDifficulty(diff) {
+    gameState.difficulty = diff;
+    const settings = gameState.difficultySettings[diff];
+    gameState.maxOrdersInQueue = settings.startOrders;
+    document.getElementById('level-value').textContent = gameState.level;
+    updateDeliveryCounter();
+    generateInitialOrders();
+    updateTimer();
+    updateOrderDisplay();
+    updateCraftingTableDisplay();
+    
+    // Hide overlay
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) overlay.style.display = 'none';
+    
+    // Start loop and timer
+    gameState.isGameRunning = true;
+    gameState.lastFrameTime = Date.now();
+    requestAnimationFrame(gameLoop);
+    startTimer();
+}
+
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn[data-difficulty]');
+    if (btn) {
+        const diff = btn.getAttribute('data-difficulty');
+        startGameWithDifficulty(diff);
+    }
+});
 
 // ==============================================
 // HELPER FUNCTIONS

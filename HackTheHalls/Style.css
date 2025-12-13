@@ -1,4 +1,42 @@
+.rules-overlay {
+    position: fixed;
+    inset: 0;
+    background: #2c1810;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+/* Hide game elements when rules overlay is visible */
+.rules-overlay ~ * .game-info,
+.rules-overlay ~ * .recipe-card,
+.rules-overlay ~ * .put-area,
+.rules-overlay ~ * .elf,
+.rules-overlay ~ * .resource-stations {
+    display: none;
+}
+
+.rules-list {
+    text-align: left;
+    margin: 10px 0 6px;
+    padding-left: 18px;
+}
+
+.recipe-title {
+    margin: 0 0 10px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.recipe-card.closed #recipe-scroll {
+    display: none;
+}
 /* General Styles */
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -16,14 +54,74 @@ body {
     overflow: hidden;
 }
 
+.game-container::before,
+.game-container::after {
+    display: none !important;
+}
+
+/* ==============================================
+   START OVERLAY
+   ============================================== */
+
+.start-overlay {
+    position: fixed;
+    inset: 0;
+    background: #2c1810;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+
+/* Hide game elements when start overlay is visible */
+.start-overlay ~ * .game-info,
+.start-overlay ~ * .recipe-card,
+.start-overlay ~ * .put-area,
+.start-overlay ~ * .elf,
+.start-overlay ~ * .resource-stations {
+    display: none;
+}
+
+.overlay-card {
+    background: #fff7e6;
+    border: 3px solid #c09a5a;
+    border-radius: 12px;
+    padding: 24px;
+    width: clamp(280px, 40vw, 420px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    text-align: center;
+    color: #2c1810;
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 16px 0 8px;
+}
+
+.btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 2px solid #8b4513;
+    background: #ffe3a1;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: scale(0.98); }
+
+.overlay-hint { font-size: 14px; opacity: 0.8; }
+
 /* ==============================================
    GAME INFO SECTION
    ============================================== */
 
 .game-info {
     position: absolute;
-    top: calc(20px + clamp(200px, 24vh, 260px));
-    left: 20px;
+    top: 20px;
+    left: calc(20px + clamp(180px, 18vw, 240px) + 40px);
     font-size: clamp(20px, 2.4vw, 26px);
     font-weight: 600;
     z-index: 10;
@@ -33,6 +131,13 @@ body {
     line-height: 1.4;
     text-align: left;
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transition: top 0.3s ease, left 0.3s ease;
+}
+
+/* When orders list is closed, move HUD up and to the left */
+body.orders-closed .game-info {
+    top: calc(20px + clamp(50px, 8vh, 80px));
+    left: 20px;
 }
 
 .level-display, .timer, .delivery-counter {
@@ -289,7 +394,7 @@ body {
 .station-icon img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 6px;
 }
 
@@ -316,6 +421,20 @@ body {
 #crafting-station .station-icon {
     width: clamp(180px, 24vw, 240px);
     height: clamp(160px, 22vw, 210px);
+}
+
+.crafting-contents {
+    margin-top: 8px;
+    min-width: clamp(140px, 18vw, 200px);
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #c09a5a;
+    border-radius: 8px;
+    color: #2c1810;
+    font-size: clamp(14px, 1.8vw, 16px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    text-align: left;
+    line-height: 1.4;
 }
 
 /* ==============================================

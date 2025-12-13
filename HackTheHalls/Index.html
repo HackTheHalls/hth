@@ -8,6 +8,31 @@
 </head>
 <body>
     <div class="game-container">
+        <!-- Rules Overlay: Press Enter to continue -->
+        <div class="rules-overlay" id="rules-overlay" role="dialog" aria-modal="true">
+            <div class="overlay-card">
+                <h2>Workshop Rules</h2>
+                <ul class="rules-list">
+                    <li>Carry one item at a time.</li>
+                    <li>Press E near a station to pick up or drop.</li>
+                    <li>Press C at the crafting table to craft.</li>
+                    <li>Deliver crafted toys to the put area.</li>
+                </ul>
+                <p class="overlay-hint">Press Enter to continue.</p>
+            </div>
+        </div>
+        <!-- Start Overlay: Difficulty Selection -->
+        <div class="start-overlay" id="start-overlay" role="dialog" aria-modal="true">
+            <div class="overlay-card">
+                <h2>Select Difficulty</h2>
+                <div class="difficulty-buttons">
+                    <button class="btn" data-difficulty="easy">Easy</button>
+                    <button class="btn" data-difficulty="medium">Medium</button>
+                    <button class="btn" data-difficulty="hard">Hard</button>
+                </div>
+                <p class="overlay-hint">Tip: Press E to pick up/drop, C to craft.</p>
+            </div>
+        </div>
         <!-- Game Info Section -->
         <div class="game-info">
             <div class="level-display">Level: <span id="level-value">1</span></div>
@@ -16,53 +41,58 @@
             <div class="carrying-display" id="carrying-display">Carrying: nothing</div>
         </div>
         
-        <!-- Controls Info -->
-        <div class="controls-info">
-            <div>WASD/Arrows: Move</div>
-            <div>E: Pick up / Drop / Deliver</div>
-            <div>C: Craft at bench</div>
-        </div>
+        <!-- Controls Info removed per request -->
 
         <!-- Recipe/Order Card -->
-        <div class="recipe-card">
+        <div class="recipe-card" id="recipe-card" aria-expanded="true">
             <div class="santa-hat"></div>
-            <div class="recipe-scroll">
-                <!-- ==============================================
-                     TOY RECIPES - Add new toys here
-                     ============================================== -->
-                
-                <!-- Toy 1: Bench -->
-                <div class="recipe-item toy-bench">
-                    <div class="recipe-item-name">Item: bench</div>
+            <h3 class="recipe-title" id="recipe-title">Orders (click to toggle)</h3>
+            <div class="recipe-scroll" id="recipe-scroll">
+                <!-- Toy: Train -->
+                <div class="recipe-item toy-train">
+                    <div class="recipe-item-name">Item: toy train</div>
                     <div class="materials">
-                        <div>1x wood</div>
-                        <div>1x metal</div>
+                        <div>2x wood</div>
+                        <div>2x metal</div>
                     </div>
                 </div>
 
-                <!-- Toy 2: Couch -->
-                <div class="recipe-item toy-couch">
-                    <div class="recipe-item-name">Item: couch</div>
+                <!-- Toy: Christmas Tree -->
+                <div class="recipe-item toy-christmas-tree">
+                    <div class="recipe-item-name">Item: toy christmas tree</div>
                     <div class="materials">
-                        <div>2x wood</div>
-                        <div>1x metal</div>
+                        <div>3x wood</div>
                         <div>1x fabric</div>
                     </div>
                 </div>
 
-                <!-- ==============================================
-                     ADD NEW TOYS BELOW - Copy this template:
-                     
-                <div class="recipe-item toy-TOYNAME">
-                    <div class="recipe-item-name">Item: TOYNAME</div>
+                <!-- Toy: Gingerbread -->
+                <div class="recipe-item toy-gingerbread">
+                    <div class="recipe-item-name">Item: gingerbread man</div>
                     <div class="materials">
-                        <div>Xx wood</div>
-                        <div>Xx metal</div>
-                        <div>Xx fabric</div>
+                        <div>1x wood</div>
+                        <div>1x fabric</div>
                     </div>
                 </div>
-                
-                     ============================================== -->
+
+                <!-- Toy: Teddy -->
+                <div class="recipe-item toy-teddy">
+                    <div class="recipe-item-name">Item: teddy</div>
+                    <div class="materials">
+                        <div>1x wood</div>
+                        <div>3x fabric</div>
+                    </div>
+                </div>
+
+                <!-- Toy: Nutcracker -->
+                <div class="recipe-item toy-nutcracker">
+                    <div class="recipe-item-name">Item: nutcracker</div>
+                    <div class="materials">
+                        <div>2x wood</div>
+                        <div>2x metal</div>
+                        <div>1x fabric</div>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -73,8 +103,9 @@
         </div>
 
         <!-- Elf Character (placeholder) -->
-        <div class="elf">
-            <!-- Add elf image here -->
+        <div class="elf" aria-label="Elf player">
+            <!-- Place your elf sprite here -->
+            <!-- Example: <img src="Assets/elf.png" alt="Elf" /> -->
         </div>
 
         <!-- Resource Crafting Stations -->
@@ -83,7 +114,8 @@
             <div class="station" id="wood-station" data-resource="wood">
                 <div class="station-label">wood</div>
                 <div class="station-icon">
-                    <!-- Add crafting table image here -->
+                    <!-- Place wood bench sprite -->
+                    <!-- Example: <img src="Assets/wood-bench.png" alt="Wood bench" /> -->
                 </div>
             </div>
 
@@ -91,7 +123,8 @@
             <div class="station" id="metal-station" data-resource="metal">
                 <div class="station-label">metal</div>
                 <div class="station-icon">
-                    <!-- Add crafting table image here -->
+                    <!-- Place metal bench sprite -->
+                    <!-- Example: <img src="Assets/metal-bench.png" alt="Metal bench" /> -->
                 </div>
             </div>
 
@@ -99,28 +132,20 @@
             <div class="station" id="fabric-station" data-resource="fabric">
                 <div class="station-label">fabric</div>
                 <div class="station-icon">
-                    <!-- Add crafting table image here -->
+                    <!-- Place fabric bench sprite -->
+                    <!-- Example: <img src="Assets/fabric-bench.png" alt="Fabric bench" /> -->
                 </div>
             </div>
-
-            <!-- ==============================================
-                 ADD NEW RESOURCE STATIONS HERE
-                 Copy this template:
-                 
-            <div class="station" id="RESOURCENAME-station" data-resource="RESOURCENAME">
-                <div class="station-label">RESOURCENAME</div>
-                <div class="station-icon">
-                    <!-- Add crafting table image here -->
-                </div>
-            </div>
-            
-                 ============================================== -->
 
             <!-- Crafting Station -->
             <div class="station" id="crafting-station" data-resource="crafting">
                 <div class="station-label">crafting</div>
                 <div class="station-icon">
-                    <!-- Add crafting table image here -->
+                    <!-- Place crafting table sprite -->
+                    <!-- Example: <img src="Assets/crafting-table.png" alt="Crafting table" /> -->
+                </div>
+                <div class="crafting-contents" aria-live="polite">
+                    (empty)
                 </div>
             </div>
         </div>
