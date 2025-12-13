@@ -1,357 +1,507 @@
 # 🎄 Elf Workshop Game
+🎮 Overview
+Elf Workshop Game is a fast-paced time management game where you play as Santa's elf, gathering resources, crafting toys, and delivering them to meet orders before time runs out. The game features 5 progressively challenging levels with multiple difficulty modes, a streak system for speed bonuses, and engaging visual feedback.
+📋 Table of Contents
 
-A festive resource management and crafting game where you play as Santa's elf, gathering materials, crafting toys, and fulfilling orders before time runs out!
+Features
+Installation
+How to Play
+Game Mechanics
+Architecture
+File Structure
+Customization Guide
+Technical Details
+Accessibility
+Browser Compatibility
+Troubleshooting
 
-## 📋 Table of Contents
+✨ Features
+Core Gameplay
 
-- [Overview](#overview)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [How to Play](#how-to-play)
-- [Game Mechanics](#game-mechanics)
-- [Level Progression](#level-progression)
-- [Controls](#controls)
-- [Customization Guide](#customization-guide)
-- [Technical Details](#technical-details)
-- [Troubleshooting](#troubleshooting)
+Resource Management: Gather wood, metal, and fabric from dedicated stations
+Crafting System: Combine resources to create 5 different toy types
+Order Queue: Dynamic order generation with visual progress tracking
+Time Pressure: Complete deliveries before the timer expires
+Level Progression: 5 levels with increasing difficulty and time bonuses
 
-## 🎮 Overview
+Difficulty Modes
 
-In **Elf Workshop Game**, you manage a busy toy workshop where you must:
-- Gather resources (wood, metal, fabric)
-- Craft toys according to order specifications
-- Deliver completed toys before the timer runs out
-- Progress through increasingly challenging levels
+Easy: 1 starting order, slower progression, 70% chance of single-quantity recipes
+Medium: 1 starting order, moderate progression, 50% chance of single-quantity recipes
+Hard: 2 starting orders, fast progression, 40% chance of single-quantity recipes
 
-The game features three difficulty modes, five unique toy types, and multiple levels with escalating complexity.
+Advanced Features
 
-## ✨ Features
+Streak System: Complete deliveries quickly to gain speed bonuses (up to 3x)
+Smart Order Generation: Prevents duplicate orders when possible
+Visual Feedback: Particle effects, floating text, and station highlighting
+Collision Detection: Realistic elf movement with station collision
+Pause/Resume: Escape key to pause game at any time
+Responsive UI: Adapts to different screen sizes
 
-### Gameplay Features
-- **Three Difficulty Modes**: Easy, Medium, and Hard with different order quantities and progression rates
-- **Five Toy Types**: Train, Christmas Tree, Gingerbread Man, Teddy, and Nutcracker
-- **Progressive Difficulty**: Five levels with increasing order requirements and decreasing time limits
-- **Resource Management**: Collect and manage wood, metal, and fabric resources
-- **Crafting System**: Combine materials at the crafting station to create toys
-- **Time Bonus**: Unused time carries over to the next level
-- **Dynamic Orders**: Multiple simultaneous orders that increase with difficulty
+🚀 Installation
+Quick Start
 
-### UI Features
-- Collapsible recipe card showing current orders
-- Real-time inventory display
-- Level and timer tracking
-- Delivery counter
-- Visual feedback for station interactions
-- Festive themed design with Santa hat decoration
+Download all files into a single directory:
 
-## 🚀 Getting Started
+   elf-workshop/
+   ├── Index.html
+   ├── Style.css
+   ├── Script.js (legacy monolithic file)
+   ├── main.js
+   ├── state.js
+   ├── ui.js
+   ├── crafting.js
+   ├── movement.js
+   └── Code.code-workspace
 
-### Installation
+Add audio files (optional but recommended):
 
-1. **Download the game files:**
-   - `Index.html` - Main HTML structure
-   - `Style.css` - Game styling and layout
-   - `Script.js` - Game logic and mechanics
+pickup.mp3 - Resource collection sound
+craft.mp3 - Toy crafting sound
+deliver.mp3 - Delivery completion sound
 
-2. **Optional assets** (place in the same directory):
-   - `wood-texture.jpg` - Background texture (or the game will use a fallback color)
-   - Custom sprite images for stations and characters
 
-3. **Open in browser:**
-   ```bash
-   # Simply open Index.html in any modern web browser
-   # Recommended browsers: Chrome, Firefox, Edge, Safari
-   ```
+Add background texture (optional):
 
-### File Structure
+wood-texture.jpg - Workshop floor background
+
+
+Open Index.html in a modern web browser
+
+Module-Based Setup (Recommended)
+The game uses ES6 modules for better code organization. Ensure your HTML file includes:
+html<script src="main.js" type="module"></script>
 ```
-elf-workshop-game/
-├── Index.html          # Main game file
-├── Style.css           # Styling and animations
-├── Script.js           # Game logic
-├── wood-texture.jpg    # (Optional) Background image
-└── Assets/             # (Optional) Custom sprites
-    ├── elf.png
-    ├── wood-bench.png
-    ├── metal-bench.png
-    ├── fabric-bench.png
-    └── crafting-table.png
-```
+
+**Note**: ES6 modules require a web server when using `file://` protocol. Use one of these methods:
+
+- **Python 3**: `python -m http.server 8000`
+- **Node.js**: `npx http-server`
+- **VS Code**: Use Live Server extension
 
 ## 🎯 How to Play
 
 ### Starting the Game
 
-1. **Read the Rules**: Press Enter to continue past the rules overlay
-2. **Select Difficulty**:
-   - **Easy**: 1 order at start, increases every 2 levels, 70% chance for single items
-   - **Medium**: 1 order at start, increases every level, 50% chance for single items
-   - **Hard**: 2 orders at start, increases every level, 40% chance for single items
-3. **Game Begins**: Timer starts and you can begin gathering resources
+1. **Rules Screen**: Press `Enter` to continue
+2. **Difficulty Selection**: Choose Easy, Medium, or Hard
+3. **Game Begins**: Timer starts counting down
+
+### Controls
+
+| Key | Action |
+|-----|--------|
+| `W` / `↑` | Move Up |
+| `S` / `↓` | Move Down |
+| `A` / `←` | Move Left |
+| `D` / `→` | Move Right |
+| `E` | Interact (pickup/deposit/deliver) |
+| `C` | Craft at crafting table |
+| `Esc` | Pause/Resume game |
 
 ### Gameplay Loop
 
-1. **Check Orders**: Review the recipe card (left side) to see what toys are needed
-2. **Gather Resources**: Move to resource stations (wood, metal, fabric) and press **E** to pick up
-3. **Deposit Materials**: Bring resources to the crafting station and press **E** to deposit
-4. **Craft Toys**: Once you have all required materials, press **C** at the crafting station
-5. **Deliver**: Carry the crafted toy to the "put area" and press **E** to complete the delivery
-6. **Repeat**: Continue until all orders are fulfilled or time runs out
+1. **Check Orders**: View the recipe card (top-left) for current toy orders
+2. **Gather Resources**: Walk to resource stations and press `E` to pick up materials
+3. **Deposit Materials**: Walk near the crafting table - resources auto-deposit
+4. **Craft Toys**: Press `C` at the crafting table when materials are ready
+5. **Deliver**: Carry crafted toy to the "put area" and press `E`
+6. **Repeat**: New orders generate automatically
 
-## 🛠️ Game Mechanics
+### Visual Indicators
 
-### Resource Management
-- **One Item at a Time**: You can only carry one resource or toy at once
-- **Resource Stations**: Unlimited supply of wood, metal, and fabric
-- **Crafting Table**: Stores deposited materials until crafting is complete
+- **Green Glow**: Station is in interaction range
+- **Craftable Orders**: Green-bordered orders in recipe card
+- **Progress Bar**: Shows crafting completion percentage
+- **Arrow Indicator** (Easy mode): Points to next needed resource
+- **Crafting Table Contents**: Displays deposited materials
 
-### Crafting System
+## 🔧 Game Mechanics
 
-Each toy requires specific materials:
+### Resource Types
 
-| Toy | Wood | Metal | Fabric |
-|-----|------|-------|--------|
-| **Train** | 2 | 2 | - |
-| **Christmas Tree** | 3 | - | 1 |
-| **Gingerbread Man** | 1 | - | 1 |
-| **Teddy** | 1 | - | 3 |
-| **Nutcracker** | 2 | 2 | 1 |
+| Resource | Icon | Uses |
+|----------|------|------|
+| Wood | 🪵 | Basic building material |
+| Metal | 🔩 | Mechanical parts |
+| Fabric | 🧵 | Soft toy components |
 
-**Crafting Process:**
-1. Deposit required materials at the crafting station (press E)
-2. Materials accumulate in the crafting table
-3. When you have enough materials for any order, press C to craft
-4. The game automatically selects the first craftable order
+### Toy Recipes
+
+| Toy | Wood | Metal | Fabric | Unlocked |
+|-----|------|-------|--------|----------|
+| Train | 2 | 2 | - | Level 1 |
+| Christmas Tree | 3 | - | 1 | Level 2 |
+| Gingerbread Man | 1 | - | 1 | Level 3 |
+| Teddy Bear | 1 | - | 3 | Level 4 |
+| Nutcracker | 2 | 2 | 1 | Level 5 |
+
+### Level Progression
+
+| Level | Required Deliveries | Time Limit | Available Toys |
+|-------|---------------------|------------|----------------|
+| 1 | 3 | 3:00 | Train |
+| 2 | 4 | 2:30 | Train, Christmas Tree |
+| 3 | 5 | 2:30 | Train, Christmas Tree, Gingerbread |
+| 4 | 6 | 3:00 | All except Nutcracker |
+| 5 | 7 | 3:00 | All toys |
+
+**Time Bonus**: Remaining time carries over to the next level!
+
+### Streak System
+
+Complete deliveries within **4.5 seconds** to build a streak:
+
+- **Streak 1**: Normal speed (280 px/s)
+- **Streak 2**: +60 px/s bonus speed
+- **Streak 3**: +120 px/s bonus speed (max)
+
+Speed bonus lasts for 4.5 seconds after each delivery.
 
 ### Collision System
-- Stations have collision boxes to prevent walking through them
-- The elf cannot pass through resource stations or the crafting table
-- Collision detection uses axis-aligned bounding box (AABB) algorithm
 
-### Station Interaction
-- **Interaction Range**: 100 pixels from station center
-- **Visual Feedback**: Stations glow gold when in range
-- **Multiple Stations**: Only the nearest station highlights at a time
+- Elf cannot walk through stations
+- Collision resolution uses axis-aligned bounding boxes (AABB)
+- Stations have reduced hitboxes (75% of visual size) for better movement
 
-## 📊 Level Progression
+## 📐 Architecture
 
-### Level Configuration
+### Module Structure
 
-| Level | Orders Required | Time Limit | Available Toys |
-|-------|----------------|------------|----------------|
-| **1** | 3 | 3:00 | Train |
-| **2** | 4 | 2:30 | Train, Christmas Tree |
-| **3** | 5 | 2:30 | Train, Christmas Tree, Gingerbread |
-| **4** | 6 | 3:00 | Train, Christmas Tree, Gingerbread, Teddy |
-| **5** | 7 | 3:00 | All toys |
+The game uses a modular architecture for maintainability:
+```
+main.js          → Game initialization, level management, event coordination
+state.js         → Shared state, constants, audio, effects
+ui.js            → Display updates, visual feedback
+crafting.js      → Resource gathering, crafting logic, delivery
+movement.js      → Elf movement, collision detection, input handling
+```
 
-### Progression Mechanics
-- **Time Bonus**: Remaining time carries over to the next level
-- **Order Scaling**: Number of simultaneous orders increases based on difficulty
-- **Toy Unlocking**: New toy types unlock progressively
-- **Winning**: Complete all 5 levels to win the game
+### Data Flow
+```
+User Input → movement.js → state.js → crafting.js → ui.js → DOM
+                ↓                          ↓
+         Game Loop (main.js)      Audio/Effects (state.js)
+Key Design Patterns
 
-## 🎮 Controls
+State Management: Centralized in state.js for predictable data flow
+Event Bus: Simple pub/sub system for decoupled communication
+Object Pools: Reusable particle and text elements for performance
+Idle Callbacks: Non-critical UI updates deferred with requestIdleCallback
 
-### Movement
-- **WASD** or **Arrow Keys**: Move the elf in all directions
-- Diagonal movement is supported and normalized for consistent speed
+📁 File Structure
+HTML (Index.html)
 
-### Interactions
-- **E Key**: 
-  - Pick up resources from stations
-  - Deposit resources at crafting station
-  - Deliver toys at put area
-- **C Key**: 
-  - Craft toys at the crafting station (when materials are available)
+Game container structure
+Overlays: rules, difficulty selection, pause menu
+Station elements with data attributes
+Elf character element
+Recipe card and HUD elements
 
-### UI Interactions
-- **Click Recipe Title**: Toggle the recipe card open/closed
-- **Enter**: Continue from rules screen
-- **Mouse Click**: Select difficulty and restart game
+CSS (Style.css)
 
-## 🔧 Customization Guide
+Responsive layout with clamp() for fluid sizing
+Station styling with hover effects and tooltips
+Animation keyframes for particles, floating text
+Overlay and modal designs
+Accessibility utilities (.sr-only)
 
-### Adding New Toys
+JavaScript Modules
+state.js - Global State
+javascriptCONSTANTS          // Game configuration
+gameState          // Current game state
+toyRecipes         // Toy crafting recipes
+levelConfig        // Level definitions
+craftingTable      // Material storage
+soundLibrary       // Audio assets
+effectPools        // Reusable DOM elements
+main.js - Core Game Logic
+javascriptinitGame()                    // Setup game on load
+startGameWithDifficulty()    // Begin gameplay
+generateNewOrder()           // Create orders
+levelComplete()              // Level transition
+gameLoop()                   // Main update loop
+startTimer()                 // Countdown timer
+crafting.js - Resource/Crafting
+javascriptgatherResource()             // Pick up materials
+depositMaterialForCrafting() // Add to crafting table
+attemptCrafting()           // Create toy from materials
+deliverToy()                // Complete order
+autoDepositIfCraftingNearby() // Convenience feature
+movement.js - Player Control
+javascriptupdateElfPosition()          // Apply movement per frame
+resolveCollisions()         // Handle station collisions
+checkStationProximity()     // Detect nearby stations
+handleInteraction()         // Process E key
+handleKeyDown/Up()          // Input handling
+ui.js - Display Updates
+javascriptupdateTimer()                // Clock display
+updateOrderDisplay()        // Recipe card
+updateCarryingDisplay()     // Held item
+updateCraftingProgress()    // Progress bar
+markCraftableOrders()       // Highlight ready orders
+showPickupEffects()         // Visual feedback
+🛠️ Customization Guide
+Adding a New Resource
 
-1. **Add Recipe to Script.js:**
-```javascript
-const toyRecipes = {
-    // Existing recipes...
-    "your-new-toy": {
-        wood: 2,
-        metal: 1,
-        fabric: 1
+Add station HTML:
+
+html<div class="station" id="newresource-station" data-resource="newresource">
+    <div class="station-label">newresource</div>
+    <div class="station-icon"></div>
+</div>
+
+Add icon in state.js:
+
+javascriptexport const resourceIcons = {
+    wood: '🪵',
+    metal: '🔩',
+    fabric: '🧵',
+    newresource: '🎨' // Your icon
+};
+
+Add CSS styling (optional):
+
+css#newresource-station .station-icon {
+    background: #your-color;
+}
+Adding a New Toy
+
+Define recipe in state.js:
+
+javascriptexport const toyRecipes = {
+    // ... existing toys
+    'robot': {
+        metal: 3,
+        fabric: 1,
+        newresource: 2
     }
 };
-```
 
-2. **Add to Level Configuration:**
-```javascript
-const levelConfig = [
-    // Add to availableToys array in desired level
+Add to level config:
+
+javascriptexport const levelConfig = [
+    // ... existing levels
     { 
-        requiredDeliveries: 5, 
-        timeLimit: 180, 
-        availableToys: ['train', 'your-new-toy'] 
+        requiredDeliveries: 8, 
+        timeLimit: 200, 
+        availableToys: ['train', 'christmas-tree', 'gingerbread', 'teddy', 'nutcracker', 'robot'] 
     }
 ];
-```
 
-3. **Add HTML Recipe Display (Index.html):**
-```html
-<div class="recipe-item toy-your-new-toy">
-    <div class="recipe-item-name">Item: your new toy</div>
-    <div class="materials">
-        <div>2x wood</div>
-        <div>1x metal</div>
-        <div>1x fabric</div>
-    </div>
-</div>
-```
+Add CSS class for styling (optional):
 
-4. **Add Optional Custom Styling (Style.css):**
-```css
-.toy-your-new-toy .materials {
+css.toy-robot .materials {
     margin-left: 10px;
-    /* Add custom styling */
 }
-```
-
-### Adding New Resources
-
-1. **Add Station HTML (Index.html):**
-```html
-<div class="station" id="newresource-station" data-resource="newresource">
-    <div class="station-label">new resource</div>
-    <div class="station-icon">
-        <!-- Optional: <img src="Assets/newresource.png" /> -->
-    </div>
-</div>
-```
-
-2. **Add Custom Styling (Style.css):**
-```css
-#newresource-station .station-icon {
-    background: #customcolor;
+Adding a New Level
+Simply append to levelConfig in state.js:
+javascript{ 
+    requiredDeliveries: 10,    // Orders to complete
+    timeLimit: 240,            // Time bonus (seconds)
+    availableToys: ['train', 'robot', 'spaceship']
 }
-```
-
-3. **Update Recipes** to use the new resource in Script.js
-
-### Adjusting Difficulty
-
-Modify `difficultySettings` in Script.js:
-```javascript
-difficultySettings: {
-    easy: {
-        startOrders: 1,                    // Initial simultaneous orders
-        increaseEveryLevels: 2,            // Levels between order increases
-        singleQuantityChance: 0.7          // Currently unused (future feature)
-    }
+Modifying Difficulty
+Edit difficultySettings in state.js:
+javascriptexpert: {
+    startOrders: 3,              // Initial order count
+    increaseEveryLevels: 1,      // Orders increase frequency
+    singleQuantityChance: 0.2    // Smaller recipe probability
 }
-```
+Changing Game Speed
+In state.js:
+javascriptelf: {
+    baseSpeed: 350,  // Increase for faster movement
+    // ...
+}
 
-### Modifying Level Requirements
+CONSTANTS = {
+    streakSpeedBonus: 80,  // Per-streak speed increase
+    streakWindowMs: 4500,  // Streak time window
+    // ...
+}
+🔍 Technical Details
+Performance Optimizations
 
-Edit `levelConfig` array in Script.js:
-```javascript
-const levelConfig = [
-    { 
-        requiredDeliveries: 3,              // Orders to complete
-        timeLimit: 180,                     // Seconds given (+ carryover)
-        availableToys: ['train', 'teddy']   // Available toy types
-    }
-];
-```
+Object Pooling: Reuses DOM elements for particles and floating text
 
-## 🔍 Technical Details
+javascript   // state.js
+   ensureEffectPools() // Pre-creates reusable elements
 
-### Architecture
+Idle Callbacks: Defers non-critical updates
 
-**Game State Management:**
-- Centralized `gameState` object tracks all game data
-- Single source of truth for elf position, inventory, orders, and timing
+javascript   scheduleIdle(() => updateCraftingProgress());
 
-**Rendering:**
-- Vanilla JavaScript DOM manipulation
-- CSS transforms for smooth movement
-- RequestAnimationFrame for game loop (targeting 60 FPS)
+CSS will-change: Hints browser for elf transform optimization
 
-**Collision Detection:**
-- Rectangle intersection algorithm (AABB)
-- Separate collision and visual layers
-- 25% inset on station hitboxes for forgiving gameplay
+css   .elf { will-change: transform; }
 
-### Performance Considerations
+Animation via classList: Restarts CSS animations efficiently
 
-- **Game Loop**: Fixed at ~60 FPS using requestAnimationFrame
-- **Delta Time**: Frame-independent movement using delta time calculations
-- **Event Delegation**: Minimal event listeners for efficiency
-- **CSS Hardware Acceleration**: Transform-based animations
+javascript   el.classList.remove('animating');
+   void el.offsetWidth; // Force reflow
+   el.classList.add('animating');
+Collision Detection Algorithm
+Uses AABB (Axis-Aligned Bounding Box) detection:
+javascriptfunction rectIntersect(a, b) {
+    return a.x < b.x + b.w && 
+           a.x + a.w > b.x && 
+           a.y < b.y + b.h && 
+           a.y + a.h > b.y;
+}
+Resolution prioritizes smallest overlap axis to prevent sticking.
+Coordinate System
 
-### Browser Compatibility
+Origin: Top-left corner (0, 0)
+Elf Position: Top-left corner of elf sprite
+Station Position: Center point for proximity checks
+Collision Boxes: Inset by 25% from visual bounds
 
-- **Tested On**: Chrome, Firefox, Edge, Safari
-- **Requirements**: ES6+ JavaScript support
-- **Responsive**: Adapts to different screen sizes with clamp() functions
+Audio System
+javascriptsoundLibrary[name].currentTime = 0;  // Reset to start
+soundLibrary[name].play();           // Play immediately
+Catches exceptions for browsers blocking autoplay.
+♿ Accessibility
+Features Implemented
 
-## 🐛 Troubleshooting
+ARIA Labels: All interactive elements labeled
+Live Regions: Screen reader announcements for game events
+Keyboard-Only Play: Full game playable without mouse
+Focus Management: Tabindex and focus trapping in overlays
+Semantic HTML: Proper heading hierarchy and landmarks
+Alt Text: All images have descriptive alternatives
 
-### Common Issues
+Screen Reader Announcements
+javascriptannounce("Picked up wood");      // Resource gathering
+announce("Crafted train");       // Toy creation
+announce("Delivered teddy");     // Order completion
+Announcements sent to #aria-live element with role="status".
+Keyboard Navigation
 
-**Game won't start:**
-- Ensure all three files (HTML, CSS, JS) are in the same directory
-- Check browser console (F12) for JavaScript errors
-- Verify you've selected a difficulty mode
+Tab: Navigate buttons in overlays
+Enter: Activate buttons, confirm selections
+Escape: Pause game, close dialogs
+WASD/Arrows: Game movement (doesn't require focus)
 
-**Elf moves too fast/slow:**
-- Adjust `elf.speed` value in Script.js (default: 280 pixels/second)
+🌐 Browser Compatibility
+Minimum Requirements
 
-**Can't interact with stations:**
-- Check interaction distance (default: 100 pixels)
-- Ensure station has correct `data-resource` attribute
-- Verify station positions are initialized (check console)
+Chrome/Edge: 90+
+Firefox: 88+
+Safari: 14+
+Opera: 76+
 
-**Timer not working:**
-- Verify game is running (`gameState.isGameRunning === true`)
-- Check for JavaScript errors in console
+Required Features
 
-**Orders not appearing:**
-- Ensure difficulty is selected
-- Check `orderQueue` in game state
-- Verify `generateInitialOrders()` is called after difficulty selection
+ES6 Modules
+CSS Grid/Flexbox
+clamp() CSS function
+requestAnimationFrame
+requestIdleCallback (optional, has fallback)
 
-### Debug Mode
+Known Issues
 
-Add to browser console while playing:
-```javascript
-// View current game state
-console.log(gameState);
+Safari < 14: clamp() not supported - use fixed sizes
+Firefox < 88: Module script loading inconsistent - use polyfill
+Mobile Browsers: Touch controls not implemented
 
-// Check elf position
-console.log(gameState.elf);
+Testing Checklist
 
-// View current orders
-console.log(gameState.orderQueue);
+ Stations render correctly
+ Elf movement smooth at 60 FPS
+ Audio plays without user gesture (or after first interaction)
+ Overlays display properly
+ Orders generate and clear correctly
+ Timer counts down accurately
+ Pause/resume works
 
-// Check crafting table contents
-console.log(craftingTable);
-```
+🐛 Troubleshooting
+Game Won't Start
+Problem: Blank screen or console errors
+Solutions:
 
-## 📝 License
+Check browser console (F12) for errors
+Ensure all files in same directory
+Use web server (not file:// protocol)
+Verify type="module" in script tag
 
-This game is provided as-is for educational and entertainment purposes. Feel free to modify and extend it for your own projects!
+Audio Not Playing
+Problem: Sounds don't work
+Solutions:
 
-## 🎄 Credits
+Check audio files exist and are named correctly
+Try user interaction first (click/keypress) to unlock audio
+Lower volume in CONSTANTS if distorted
+Check browser autoplay policy settings
 
-Created as a festive resource management game demonstration. Perfect for learning game development concepts including:
-- Game loops and delta time
-- State management
-- Collision detection
-- UI/UX design
-- Progressive difficulty systems
+Elf Gets Stuck
+Problem: Character cannot move past stations
+Solutions:
 
----
+Reduce station blocker size in initStationPositions()
+Increase elfMargin in CONSTANTS
+Check for overlapping collision boxes
 
-**Enjoy crafting toys and spreading holiday cheer! 🎅🎁**
+Performance Issues
+Problem: Lag or stuttering
+Solutions:
+
+Reduce particlePoolSize and floatingTextPoolSize
+Disable particle effects in production
+Increase scheduleIdle timeout values
+Check for memory leaks in console
+
+Orders Not Crafting
+Problem: "Ready to craft!" but nothing happens
+Solutions:
+
+Ensure elf is not carrying anything
+Walk directly to crafting station
+Press C (not E) to craft
+Check console for recipe matching errors
+
+Module Loading Errors
+Problem: "Cannot use import outside a module"
+Solutions:
+
+Add type="module" to script tag
+Use HTTP server instead of file:// protocol
+Check for syntax errors in JS files
+Verify import paths are correct
+
+📝 Development Notes
+Code Style
+
+ES6+: Arrow functions, destructuring, template literals
+Modules: Explicit imports/exports
+Naming: camelCase for functions, UPPER_CASE for constants
+Comments: JSDoc-style for public functions
+
+Future Enhancements
+
+ Mobile touch controls
+ Sound toggle button
+ High score tracking with localStorage
+ More toy types and resources
+ Workshop upgrades system
+ Mini-games for resource gathering
+ Multiplayer mode
+ Achievement system
+
+Contributing
+When adding features:
+
+Follow existing module structure
+Add to appropriate file (state/ui/crafting/movement)
+Update this README
+Test across browsers
+Maintain accessibility features
+
+
+📄 License
+This project is provided as-is for educational and personal use.
+🎄 Credits
+Created as a festive workshop management game. Enjoy helping Santa fulfill toy orders!
+Version: 2.0 (Modular Architecture)
+Last Updated: December 2025
