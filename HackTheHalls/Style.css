@@ -109,6 +109,12 @@ body {
     font-size: 16px;
 }
 
+.btn.ghost {
+    background: rgba(255, 255, 255, 0.8);
+    border-style: dashed;
+    font-size: 14px;
+}
+
 .btn:hover { filter: brightness(1.05); }
 .btn:active { transform: scale(0.98); }
 
@@ -132,6 +138,13 @@ body {
     text-align: left;
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
     transition: top 0.3s ease, left 0.3s ease;
+}
+
+.hud-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 /* When orders list is closed, move HUD up and to the left */
@@ -298,6 +311,16 @@ body.orders-closed .game-info {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
 }
 
+.put-area.delivered {
+    animation: put-pulse 0.45s ease-out;
+}
+
+@keyframes put-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0.4); }
+    50% { transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0.2); }
+}
+
 /* ==============================================
    ELF CHARACTER
    ============================================== */
@@ -313,6 +336,7 @@ body.orders-closed .game-info {
     transition: transform 0.1s;
     box-shadow: 0 6px 12px rgba(0,0,0,0.35);
     overflow: hidden;
+    will-change: transform;
 }
 
 .elf::before {
@@ -351,6 +375,24 @@ body.orders-closed .game-info {
     gap: clamp(10px, 1.5vw, 16px);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
+    position: relative;
+}
+
+.station.arrow-indicator::before {
+    content: '➜';
+    position: absolute;
+    left: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffd700;
+    font-size: 20px;
+    text-shadow: 0 0 8px rgba(0,0,0,0.4);
+    animation: arrow-wiggle 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes arrow-wiggle {
+    from { transform: translateY(-50%) translateX(-2px); }
+    to { transform: translateY(-50%) translateX(4px); }
 }
 
 .station:hover {
@@ -398,6 +440,31 @@ body.orders-closed .game-info {
     border-radius: 6px;
 }
 
+.station.tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: -28px;
+    right: 0;
+    background: #fff7e6;
+    border: 1px solid #c09a5a;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.station.tooltip:hover::after,
+.station.in-range::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* Station Active State */
 .station.active .station-icon {
     border-color: #ffd700;
@@ -435,6 +502,132 @@ body.orders-closed .game-info {
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     text-align: left;
     line-height: 1.4;
+}
+
+/* Floating text & particles */
+.floating-text {
+    position: absolute;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    pointer-events: none;
+    z-index: 120;
+}
+
+.floating-text.animating {
+    animation: float-up 0.8s ease-out forwards;
+}
+
+@keyframes float-up {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, -30px); }
+}
+
+.particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.9;
+    z-index: 110;
+}
+
+.particle.animating {
+    animation: particle-pop 0.5s ease-out forwards;
+}
+
+@keyframes particle-pop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; }
+    100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; }
+}
+
+.craftable {
+    border-color: #4caf50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+/* Colorblind-friendly mode removed */
+
+.pause-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+}
+
+.pause-overlay[aria-hidden="false"] {
+    display: flex;
+}
+
+.pause-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
+#key-debug {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1400;
+}
+
+#key-debug.show {
+    opacity: 1;
+    animation: key-flash 0.6s ease-out forwards;
+}
+
+@keyframes key-flash {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(4px); }
+}
+
+.crafting-progress {
+    margin-top: 8px;
+    width: clamp(180px, 24vw, 240px);
+    background: rgba(0,0,0,0.08);
+    border: 2px solid #c09a5a;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.crafting-progress-bar {
+    height: 12px;
+    width: 0%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    transition: width 0.25s ease;
+}
+
+.crafting-needs {
+    padding: 6px 8px;
+    font-size: 13px;
+    background: rgba(255,255,255,0.9);
+    border-top: 1px solid rgba(0,0,0,0.08);
 }
 
 /* ==============================================

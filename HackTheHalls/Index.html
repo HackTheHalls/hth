@@ -39,6 +39,9 @@
             <div class="timer">Time: <span id="timer-value">3:00</span></div>
             <div class="delivery-counter">Orders Left: <span id="delivery-count">3</span></div>
             <div class="carrying-display" id="carrying-display">Carrying: nothing</div>
+            <div class="hud-buttons">
+                <button id="pause-toggle" class="btn ghost" aria-haspopup="true" aria-controls="pause-overlay">Pause (Esc)</button>
+            </div>
         </div>
         
         <!-- Controls Info removed per request -->
@@ -147,8 +150,29 @@
                 <div class="crafting-contents" aria-live="polite">
                     (empty)
                 </div>
+                <div class="crafting-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="crafting-progress-bar"></div>
+                    <div class="crafting-needs" id="crafting-needs">Needs: -</div>
+                </div>
             </div>
         </div>
+
+        <!-- Pause Overlay -->
+        <div class="pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+            <div class="overlay-card">
+                <h2>Paused</h2>
+                <p>Press Esc to resume or click resume.</p>
+                <div class="pause-buttons">
+                    <button class="btn" id="resume-btn">Resume</button>
+                    <button class="btn" id="restart-btn">Restart</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live region for announcements -->
+        <div class="sr-only" id="aria-live" role="status" aria-live="polite"></div>
+        <!-- Key debug overlay -->
+        <div id="key-debug" aria-hidden="true"></div>
     </div>
 
     <script src="Script.js"></script>

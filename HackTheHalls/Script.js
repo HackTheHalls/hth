@@ -2,6 +2,15 @@
 // GAME STATE
 // ==============================================
 
+const CONSTANTS = {
+    interactionDistance: 110,
+    elfMargin: 50,
+    particlePoolSize: 24,
+    floatingTextPoolSize: 16,
+    particleColors: ['#ffd700', '#ff8c42', '#7ad7f0'],
+    soundVolume: 0.4
+};
+
 const gameState = {
     timeLeft: 180, // 3 minutes in seconds
     level: 1,
@@ -47,11 +56,25 @@ const gameState = {
         ArrowDown: false,
         ArrowRight: false,
         e: false, // Interaction key (pickup/deposit/deliver)
-        c: false // Craft key
+        c: false, // Craft key
+        Escape: false
     },
     lastFrameTime: Date.now(),
     timerInterval: null,
-    isGameRunning: false
+    isGameRunning: false,
+    paused: false
+};
+
+// Simple event bus for decoupling
+const events = {
+    listeners: {},
+    on(name, cb) {
+        if (!this.listeners[name]) this.listeners[name] = [];
+        this.listeners[name].push(cb);
+    },
+    emit(name, payload) {
+        (this.listeners[name] || []).forEach(cb => cb(payload));
+    }
 };
 
 // ==============================================
@@ -82,6 +105,25 @@ const toyRecipes = {
         fabric: 1
     }
 };
+
+const resourceIcons = {
+    wood: '🪵',
+    metal: '🔩',
+    fabric: '🧵'
+};
+
+const soundLibrary = {
+    pickup: new Audio('pickup.mp3'),
+    craft: new Audio('craft.mp3'),
+    deliver: new Audio('deliver.mp3')
+};
+Object.values(soundLibrary).forEach(audio => {
+    audio.volume = CONSTANTS.soundVolume;
+});
+
+// Pools for lightweight effects to avoid DOM churn
+const floatingTextPool = [];
+const particlePool = [];
 
 // Level configuration - defines difficulty progression
 const levelConfig = [
@@ -137,6 +179,7 @@ function getSingleQuantityChance() {
 
 function levelComplete() {
     clearInterval(gameState.timerInterval);
+    gameState.timerInterval = null;
     
     if (gameState.level >= levelConfig.length) {
         gameWon();
@@ -191,6 +234,7 @@ function generateNewOrder() {
     };
     gameState.orderQueue.push(order);
     updateOrderDisplay();
+    updateCraftingProgress();
 }
 
 function generateInitialOrders() {
@@ -225,6 +269,112 @@ function updateOrderDisplay() {
         recipeItem.appendChild(materials);
         recipeScroll.appendChild(recipeItem);
     });
+
+    markCraftableOrders();
+}
+
+function canCraftOrder(order) {
+    for (const [resource, needed] of Object.entries(order.recipe)) {
+        if (!craftingTable[resource] || craftingTable[resource] < needed) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function markCraftableOrders() {
+    const scroll = document.querySelector('.recipe-scroll');
+    if (!scroll) return;
+    scroll.querySelectorAll('.recipe-item').forEach(item => {
+        const orderId = item.dataset.orderId;
+        const order = gameState.orderQueue.find(o => o.id.toString() === orderId);
+        if (order && canCraftOrder(order)) {
+            item.classList.add('craftable');
+        } else {
+            item.classList.remove('craftable');
+        }
+    });
+}
+
+function updateCraftingProgress() {
+    const bar = document.querySelector('.crafting-progress-bar');
+    const needsLabel = document.getElementById('crafting-needs');
+    if (!bar || !needsLabel) return;
+    if (gameState.orderQueue.length === 0) {
+        bar.style.width = '0%';
+        needsLabel.textContent = 'Needs: waiting for orders';
+        return;
+    }
+    const order = gameState.orderQueue[0];
+    let have = 0;
+    let need = 0;
+    const missingList = [];
+    for (const [res, qty] of Object.entries(order.recipe)) {
+        need += qty;
+        const haveQty = craftingTable[res] || 0;
+        have += Math.min(haveQty, qty);
+        if (haveQty < qty) missingList.push(`${resourceIcons[res] || res} x${qty - haveQty}`);
+    }
+    const pct = need === 0 ? 0 : Math.min(100, (have / need) * 100);
+    bar.style.width = `${pct}%`;
+    bar.parentElement.setAttribute('aria-valuenow', Math.round(pct));
+    needsLabel.textContent = missingList.length === 0 ? 'Ready to craft!' : `Needs: ${missingList.join(', ')}`;
+}
+
+function playSound(name) {
+    const snd = soundLibrary[name];
+    if (!snd) return;
+    try {
+        snd.currentTime = 0;
+        snd.play();
+    } catch (e) {
+        // ignore autoplay issues
+    }
+}
+
+function ensureEffectPools() {
+    while (floatingTextPool.length < CONSTANTS.floatingTextPoolSize) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.style.display = 'none';
+        document.body.appendChild(el);
+        floatingTextPool.push(el);
+    }
+    while (particlePool.length < CONSTANTS.particlePoolSize) {
+        const el = document.createElement('div');
+        el.className = 'particle';
+        el.style.display = 'none';
+        document.body.appendChild(el);
+        particlePool.push(el);
+    }
+}
+
+function spawnFloatingText(text, x, y) {
+    ensureEffectPools();
+    const el = floatingTextPool.find(n => n.style.display === 'none') || floatingTextPool[0];
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.display = 'block';
+    el.classList.remove('animating');
+    void el.offsetWidth; // restart animation
+    el.classList.add('animating');
+    setTimeout(() => { el.style.display = 'none'; }, 800);
+}
+
+function spawnParticles(x, y) {
+    ensureEffectPools();
+    for (let i = 0; i < 4; i++) {
+        const el = particlePool.find(n => n.style.display === 'none') || particlePool[0];
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.background = CONSTANTS.particleColors[i % CONSTANTS.particleColors.length];
+        el.style.display = 'block';
+        el.classList.remove('animating');
+        void el.offsetWidth;
+        el.classList.add('animating');
+        setTimeout(() => { el.style.display = 'none'; }, 500);
+    }
 }
 
 // ==============================================
@@ -255,7 +405,7 @@ function updateElfPosition(deltaTime) {
     elf.y += dy * elf.speed * deltaTime;
     
     // Clamp to screen bounds
-    const margin = 50;
+    const margin = CONSTANTS.elfMargin;
     elf.x = Math.max(margin, Math.min(window.innerWidth - margin - elf.width, elf.x));
     elf.y = Math.max(margin, Math.min(window.innerHeight - margin - elf.height, elf.y));
 
@@ -263,8 +413,7 @@ function updateElfPosition(deltaTime) {
     
     // Update visual position
     const elfElement = document.querySelector('.elf');
-    elfElement.style.left = elf.x + 'px';
-    elfElement.style.top = elf.y + 'px';
+    elfElement.style.transform = `translate(${elf.x}px, ${elf.y}px)`;
 }
 
 function resolveCollisions(prevX, prevY) {
@@ -299,8 +448,7 @@ function resolveCollisions(prevX, prevY) {
     }
     // Update position after resolution
     const elfElement = document.querySelector('.elf');
-    elfElement.style.left = elf.x + 'px';
-    elfElement.style.top = elf.y + 'px';
+    elfElement.style.transform = `translate(${elf.x}px, ${elf.y}px)`;
 }
 
 function rectIntersect(a, b) {
@@ -312,9 +460,10 @@ function rectIntersect(a, b) {
     );
 }
 
+
 function checkStationProximity() {
     const elf = gameState.elf;
-    const interactionDistance = 100;
+    const interactionDistance = CONSTANTS.interactionDistance;
     
     for (const [stationId, stationPos] of Object.entries(gameState.stations)) {
         const dx = (elf.x + elf.width / 2) - stationPos.x;
@@ -396,6 +545,8 @@ function handleKeyDown(event) {
             handleInteraction();
         } else if (event.key === 'c') {
             handleCraftKey();
+        } else if (event.key === 'Escape') {
+            togglePause();
         }
     }
 }
@@ -420,6 +571,10 @@ function gatherResource(resource) {
 
 function showResourceFeedback(resource) {
     console.log(`Picked up ${resource}!`);
+    spawnFloatingText(`+1 ${resource}`, gameState.elf.x, gameState.elf.y - 10);
+    spawnParticles(gameState.elf.x, gameState.elf.y);
+    playSound('pickup');
+    announce(`Picked up ${resource}`);
 }
 
 // ==============================================
@@ -437,6 +592,8 @@ function depositMaterialForCrafting(resource) {
     gameState.elf.carrying = null;
     updateCarryingDisplay();
     updateCraftingTableDisplay();
+    updateCraftingProgress();
+    markCraftableOrders();
     console.log(`Deposited ${resource} at crafting table. Current table:`, craftingTable);
 }
 
@@ -467,6 +624,12 @@ function attemptCrafting() {
             gameState.elf.carrying = { type: 'crafted', toyName: order.toyName };
             updateCarryingDisplay();
             updateCraftingTableDisplay();
+            updateCraftingProgress();
+            markCraftableOrders();
+            spawnFloatingText('Crafted!', gameState.elf.x, gameState.elf.y - 10);
+            spawnParticles(gameState.elf.x, gameState.elf.y);
+            playSound('craft');
+            announce(`Crafted ${order.toyName}`);
             
             console.log(`Crafted ${order.toyName}!`);
             return;
@@ -474,6 +637,18 @@ function attemptCrafting() {
     }
     
     console.log('Cannot craft any current order with available materials');
+}
+
+function autoDepositIfCraftingNearby() {
+    if (!gameState.elf.carrying || gameState.elf.carrying.type !== 'resource') return;
+    const craftStation = gameState.stations['crafting-station'];
+    if (!craftStation) return;
+    const dx = (gameState.elf.x + gameState.elf.width / 2) - craftStation.x;
+    const dy = (gameState.elf.y + gameState.elf.height / 2) - craftStation.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < CONSTANTS.interactionDistance * 0.9) {
+        depositMaterialForCrafting(gameState.elf.carrying.resource);
+    }
 }
 
 function updateCraftingTableDisplay() {
@@ -485,8 +660,10 @@ function updateCraftingTableDisplay() {
         return;
     }
     box.innerHTML = entries
-        .map(([res, amt]) => `${amt}x ${res}`)
+        .map(([res, amt]) => `${resourceIcons[res] || res} ${amt}x ${res}`)
         .join('<br>');
+    updateCraftingProgress();
+    markCraftableOrders();
 }
 
 // ==============================================
@@ -503,7 +680,12 @@ function deliverToy(toyName) {
         gameState.elf.carrying = null;
         updateCarryingDisplay();
         updateOrderDisplay();
+        updateCraftingProgress();
         completeDelivery();
+        spawnFloatingText('Delivered!', gameState.elf.x, gameState.elf.y - 10);
+        spawnParticles(gameState.elf.x, gameState.elf.y);
+        playSound('deliver');
+        announce(`Delivered ${toyName}`);
         console.log(`Delivered: ${toyName}`);
     } else {
         console.log(`No order for ${toyName}!`);
@@ -535,12 +717,14 @@ function gameLoop() {
     
     if (gameState.isGameRunning) {
         updateElfPosition(deltaTime);
+        autoDepositIfCraftingNearby();
         checkStationProximity();
         requestAnimationFrame(gameLoop);
     }
 }
 
 function startTimer() {
+    if (gameState.timerInterval) return;
     gameState.timerInterval = setInterval(() => {
         // Timer always counts down regardless of list state
         if (gameState.timeLeft > 0) {
@@ -552,6 +736,35 @@ function startTimer() {
     }, 1000);
 }
 
+function pauseGame() {
+    if (gameState.paused) return;
+    gameState.paused = true;
+    gameState.isGameRunning = false;
+    clearInterval(gameState.timerInterval);
+    gameState.timerInterval = null;
+    const overlay = document.getElementById('pause-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'false');
+}
+
+function resumeGame() {
+    if (!gameState.paused) return;
+    gameState.paused = false;
+    gameState.isGameRunning = true;
+    gameState.lastFrameTime = Date.now();
+    const overlay = document.getElementById('pause-overlay');
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
+    requestAnimationFrame(gameLoop);
+    startTimer();
+}
+
+function togglePause() {
+    if (gameState.paused) {
+        resumeGame();
+    } else {
+        pauseGame();
+    }
+}
+
 // ==============================================
 // GAME OVER / WIN CONDITIONS
 // ==============================================
@@ -559,6 +772,7 @@ function startTimer() {
 function gameOver() {
     gameState.isGameRunning = false;
     clearInterval(gameState.timerInterval);
+    gameState.timerInterval = null;
     console.log('Game Over - Time\'s up!');
     alert(`Game Over! You completed ${gameState.totalDeliveries} deliveries across ${gameState.level} level(s)!`);
 }
@@ -566,6 +780,7 @@ function gameOver() {
 function gameWon() {
     gameState.isGameRunning = false;
     clearInterval(gameState.timerInterval);
+    gameState.timerInterval = null;
     console.log('You Win! All levels completed!');
     alert(`Congratulations! You completed all ${levelConfig.length} levels with ${gameState.totalDeliveries} total deliveries!`);
 }
@@ -582,6 +797,8 @@ function initStationPositions() {
         const rect = icon.getBoundingClientRect();
         const stationId = station.id;
         const resource = station.dataset.resource;
+        station.classList.add('tooltip');
+        station.setAttribute('data-tip', resource === 'crafting' ? 'Craft here (E or C)' : `Pick up ${resource}`);
         
         gameState.stations[stationId] = {
             x: rect.left + rect.width / 2,
@@ -607,13 +824,13 @@ function initGame() {
     
     // Initialize station positions
     initStationPositions();
+    ensureEffectPools();
     
     // Initialize elf position (start near center)
     gameState.elf.x = window.innerWidth / 2;
     gameState.elf.y = window.innerHeight / 2;
     const elfElement = document.querySelector('.elf');
-    elfElement.style.left = gameState.elf.x + 'px';
-    elfElement.style.top = gameState.elf.y + 'px';
+    elfElement.style.transform = `translate(${gameState.elf.x}px, ${gameState.elf.y}px)`;
     
     // Defer orders until difficulty selected
     
@@ -657,6 +874,25 @@ document.addEventListener('click', (e) => {
     }
 });
 
+function announce(message) {
+    const live = document.getElementById('aria-live');
+    if (live) {
+        live.textContent = message;
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'pause-toggle') {
+        togglePause();
+    }
+    if (e.target.id === 'resume-btn') {
+        resumeGame();
+    }
+    if (e.target.id === 'restart-btn') {
+        window.location.reload();
+    }
+});
+
 // ==============================================
 // START GAME WHEN PAGE LOADS
 // ==============================================
@@ -679,6 +915,7 @@ function startGameWithDifficulty(diff) {
     updateTimer();
     updateOrderDisplay();
     updateCraftingTableDisplay();
+    updateCraftingProgress();
     
     // Hide overlay
     const overlay = document.getElementById('start-overlay');
