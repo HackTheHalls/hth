@@ -409,11 +409,11 @@ body.orders-closed .game-info {
 
 .resource-stations {
     position: absolute;
-    top: clamp(80px, 16vh, 140px);
-    right: clamp(80px, 12vw, 150px);
+    top: clamp(100px, 18vh, 160px);
+    right: 80px;
     display: flex;
     flex-direction: column;
-    gap: clamp(40px, 8vh, 80px);
+    gap: clamp(30px, 6vh, 60px);
     align-items: flex-end;
     z-index: 3;
 }
@@ -425,6 +425,10 @@ body.orders-closed .game-info {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
     position: relative;
+}
+
+.station .station-label {
+    display: none;
 }
 
 .station.arrow-indicator::before {
@@ -473,13 +477,13 @@ body.orders-closed .game-info {
 .station-icon {
     width: clamp(70px, 9vw, 110px);
     height: clamp(70px, 9vw, 110px);
-    background: #8b4513;
-    border: 3px solid #654321;
+    background: transparent;
+    border: none;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 7px rgba(0,0,0,0.35);
+    box-shadow: none;
 }
 
 .station-icon img {
