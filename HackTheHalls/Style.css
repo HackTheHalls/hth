@@ -37,13 +37,20 @@
     box-sizing: border-box;
 }
 
+/* ==============================================
+   BACKGROUND LAYERS (CSS-based, tiled)
+   ============================================== */
 body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-    background: url('/imgs/woodenFloor.jpg') center/cover fixed;
     overflow: hidden;
     color: #2c1810;
+    /* Outside snowy grass background */
+    background-image: url('imgs/snowyGrass.jpg');
+    background-size: 320px 320px; /* smaller tile size */
+    background-repeat: repeat;
+    background-position: center;
 }
 
 .game-container {
@@ -54,10 +61,52 @@ body {
     overflow: hidden;
 }
 
-.game-container::before,
-.game-container::after {
-    display: none !important;
+/* Workshop floor as a tiled pseudo-element */
+.game-container::before {
+    content: '';
+    position: absolute;
+    top: 60px;
+    left: 60px;
+    right: 60px;
+    bottom: 60px;
+    background-image: url('imgs/woodenFloor.jpg');
+    background-size: 256px 256px; /* smaller repeating planks */
+    background-repeat: repeat;
+    background-position: center;
+    box-shadow:
+        inset 0 0 24px rgba(0,0,0,0.28),
+        0 10px 40px rgba(0,0,0,0.35);
+    z-index: 0; /* sits above body background, below walls */
 }
+
+/* Stone wall borders using ::after and extra pseudo elements */
+.game-container::after {
+    content: '';
+    position: absolute;
+    top: 60px;
+    left: 60px;
+    right: 60px;
+    height: 24px; /* top border */
+    background-image: url('imgs/stoneWall.jpg');
+    background-size: 128px 128px; /* tighter tiling */
+    background-repeat: repeat;
+    z-index: 1;
+}
+
+/* Use dedicated elements for other borders to avoid selector complexity */
+.wall-edge {
+    position: absolute;
+    background-image: url('imgs/stoneWall.jpg');
+    background-size: 128px 128px;
+    background-repeat: repeat;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Create the remaining borders placed via HTML structure but no <img> tags */
+.wall-edge.bottom { left: 60px; right: 60px; bottom: 60px; height: 24px; }
+.wall-edge.left { top: 60px; bottom: 60px; left: 60px; width: 24px; }
+.wall-edge.right { top: 60px; bottom: 60px; right: 60px; width: 24px; }
 
 /* ==============================================
    START OVERLAY
@@ -301,7 +350,7 @@ body.orders-closed .game-info {
     font-size: clamp(18px, 2vw, 22px);
     font-weight: 600;
     color: #2c1810;
-    z-index: 10;
+    z-index: 3;
     transition: all 0.3s;
 }
 
@@ -332,7 +381,7 @@ body.orders-closed .game-info {
     background: #ffffff;
     border: 3px solid #b0291c;
     border-radius: 12px;
-    z-index: 100;
+    z-index: 5;
     transition: transform 0.1s;
     box-shadow: 0 6px 12px rgba(0,0,0,0.35);
     overflow: hidden;
@@ -366,7 +415,7 @@ body.orders-closed .game-info {
     flex-direction: column;
     gap: clamp(40px, 8vh, 80px);
     align-items: flex-end;
-    z-index: 10;
+    z-index: 3;
 }
 
 .station {
