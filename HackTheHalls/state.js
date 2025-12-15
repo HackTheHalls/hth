@@ -59,7 +59,7 @@ export const levelConfig = [
     { requiredDeliveries: 7, timeLimit: 180, availableToys: ['train', 'christmas-tree', 'gingerbread', 'teddy', 'nutcracker'] }
 ];
 
-export const resourceIcons = { wood: '🪵', metal: '🔩', fabric: '🧵' };
+export const resourceIcons = { wood: '🪵', metal: '🔩', fabric: '🧵', cotton: '🧶' };
 
 export const soundLibrary = {
     pickup: new Audio('pickup.mp3'),

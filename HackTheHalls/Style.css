@@ -410,7 +410,7 @@ body.orders-closed .game-info {
 .resource-stations {
     position: absolute;
     top: clamp(80px, 16vh, 140px);
-    right: clamp(20px, 4vw, 50px);
+    right: clamp(80px, 12vw, 150px);
     display: flex;
     flex-direction: column;
     gap: clamp(40px, 8vh, 80px);
@@ -487,6 +487,7 @@ body.orders-closed .game-info {
     height: 100%;
     object-fit: contain;
     border-radius: 6px;
+    mix-blend-mode: lighten;
 }
 
 .station.tooltip::after {
