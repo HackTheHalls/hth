@@ -48,15 +48,42 @@ export function attemptCrafting() {
     }
 }
 
+function updateCraftingBenchSprite() {
+    const sprite = document.getElementById('crafting-bench-sprite');
+    if (!sprite) return;
+    
+    const materials = Object.keys(craftingTable).filter(key => craftingTable[key] > 0).sort();
+    
+    // Map of material combinations to sprite paths
+    const spriteMap = {
+        '': 'imgs/WorkBench/woodWorkBench.png',
+        'wood': 'imgs/WorkBench/woodWorkBench.png',
+        'metal': 'imgs/WorkBench/metalWorkBench.png',
+        'fabric': 'imgs/WorkBench/fabricWorkBench.png',
+        'cotton': 'imgs/WorkBench/cottonWorkBench.png',
+        'metal,wood': 'imgs/WorkBench/WMWorkbench.png',
+        'fabric,wood': 'imgs/WorkBench/WFWorkbench.png',
+        'cotton,wood': 'imgs/WorkBench/WCWorkbench.png',
+        'fabric,metal': 'imgs/WorkBench/MFWorkbench.png',
+        'cotton,metal': 'imgs/WorkBench/MCWorkBench.png',
+        'cotton,fabric': 'imgs/WorkBench/FCWorkbench.png'
+    };
+    
+    const key = materials.join(',');
+    sprite.src = spriteMap[key] || 'imgs/WorkBench/woodWorkBench.png';
+}
+
 export function updateCraftingTableDisplay() {
     const box = document.querySelector('.crafting-contents');
     if (!box) return;
     const entries = Object.entries(craftingTable).filter(([, amt]) => amt > 0);
     if (entries.length === 0) {
         box.textContent = '(empty)';
+        updateCraftingBenchSprite();
         return;
     }
     box.innerHTML = entries.map(([res, amt]) => `${resourceIcons[res] || res} ${amt}x ${res}`).join('<br>');
+    updateCraftingBenchSprite();
 }
 
 export function deliverToy(toyName, onDelivered) {
