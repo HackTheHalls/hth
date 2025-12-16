@@ -24,7 +24,8 @@ const gameState = {
         speed: 280, // pixels per second (faster)
         carrying: null, // {type: 'resource', resource: 'wood'} or {type: 'crafted', toyName: 'train'}
         width: 60,
-        height: 80
+        height: 80,
+        currentAnimation: 'idle' // Track current animation state
     },
     stations: {}, // Will store station positions
     blockers: [], // Collision rectangles for stations
@@ -381,6 +382,32 @@ function spawnParticles(x, y) {
 // ELF MOVEMENT & CONTROLS
 // ==============================================
 
+// Update elf sprite animation based on movement direction
+function updateElfAnimation(dx, dy) {
+    const elf = gameState.elf;
+    const elfElement = document.querySelector('.elf');
+    let newAnimation = 'idle';
+    
+    // Determine animation based on movement direction
+    if (dx !== 0 || dy !== 0) {
+        // Priority: vertical movement over horizontal when both are pressed
+        if (Math.abs(dy) > Math.abs(dx)) {
+            newAnimation = dy < 0 ? 'walk-up' : 'walk-down';
+        } else {
+            newAnimation = dx < 0 ? 'walk-left' : 'walk-right';
+        }
+    }
+    
+    // Only update if animation state changed
+    if (elf.currentAnimation !== newAnimation) {
+        elf.currentAnimation = newAnimation;
+        // Remove all animation classes
+        elfElement.classList.remove('idle', 'walk-up', 'walk-down', 'walk-left', 'walk-right');
+        // Add new animation class
+        elfElement.classList.add(newAnimation);
+    }
+}
+
 function updateElfPosition(deltaTime) {
     const elf = gameState.elf;
     let dx = 0;
@@ -397,6 +424,9 @@ function updateElfPosition(deltaTime) {
         dx *= 0.707;
         dy *= 0.707;
     }
+    
+    // Update sprite animation based on movement
+    updateElfAnimation(dx, dy);
     
     // Apply movement with collision resolution
     const prevX = elf.x;
@@ -831,6 +861,8 @@ function initGame() {
     gameState.elf.y = window.innerHeight / 2;
     const elfElement = document.querySelector('.elf');
     elfElement.style.transform = `translate(${gameState.elf.x}px, ${gameState.elf.y}px)`;
+    // Initialize with idle animation
+    elfElement.classList.add('idle');
     
     // Defer orders until difficulty selected
     

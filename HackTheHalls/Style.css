@@ -376,25 +376,57 @@ body.orders-closed .game-info {
 
 .elf {
     position: absolute;
-    width: clamp(70px, 9vw, 90px);
-    height: clamp(90px, 12vw, 120px);
-    background: #ffffff;
-    border: 3px solid #b0291c;
-    border-radius: 12px;
+    width: 60px;
+    height: 80px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     z-index: 5;
     transition: transform 0.1s;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.35);
     overflow: hidden;
     will-change: transform;
+    background-repeat: no-repeat;
+    background-size: 400% 100%; /* 4 frames horizontally */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
-.elf::before {
-    content: '🧝';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: clamp(58px, 8vw, 80px);
+/* Sprite animation states */
+.elf.idle {
+    background-image: url('imgs/Charcater/No-item/Idle 1.png');
+    animation: sprite-idle 0.8s steps(4) infinite;
+}
+
+.elf.walk-down {
+    background-image: url('imgs/Charcater/No-item/walkDown.png');
+    animation: sprite-walk 0.6s steps(4) infinite;
+}
+
+.elf.walk-left {
+    background-image: url('imgs/Charcater/No-item/walkLeft.png');
+    animation: sprite-walk 0.6s steps(4) infinite;
+}
+
+.elf.walk-right {
+    background-image: url('imgs/Charcater/No-item/walkRight.png');
+    animation: sprite-walk 0.6s steps(4) infinite;
+}
+
+.elf.walk-up {
+    background-image: url('imgs/Charcater/No-item/walkUp.png');
+    animation: sprite-walk 0.6s steps(4) infinite;
+}
+
+/* Keyframes for sprite animations */
+@keyframes sprite-idle {
+    from { background-position: 0% 0; }
+    to { background-position: 100% 0; }
+}
+
+@keyframes sprite-walk {
+    from { background-position: 0% 0; }
+    to { background-position: 100% 0; }
 }
 
 .elf::after {
@@ -424,12 +456,6 @@ body.orders-closed .game-info {
 @keyframes bounce-prompt {
     from { transform: translateX(-50%) translateY(0); }
     to { transform: translateX(-50%) translateY(-4px); }
-}
-
-.elf img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
 }
 
 /* ==============================================
