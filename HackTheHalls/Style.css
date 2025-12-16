@@ -369,136 +369,122 @@ body.orders-closed .game-info {
     50% { transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
     100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0.2); }
 }
-
 /* ==============================================
    ELF CHARACTER WITH SPRITE ANIMATION
    ============================================== */
 
 /* CSS Variables for sprite animation */
-/* Walking animation states */
-:root {
-    --elf-sprite-idle: url('imgs/Charcater/No-item/Idle 1.png');
-    --elf-sprite-up: url('imgs/Charcater/No-item/walkUp.png');
-    --elf-sprite-down: url('imgs/Charcater/No-item/walkDown.png');
-    --elf-sprite-left: url('imgs/Charcater/No-item/walkLeft.png');
-    --elf-sprite-right: url('imgs/Charcater/No-item/walkRight.png');
-    --fps: 8;
-    --frames: 8;
-    --width: 270px;
-    --height: 71.25px;
-    --scale: 4; /* frames scaled up 4x to 256x256 */
+/* Idle animation */
+div.elf.idle {
+    animation: idle 2s steps(5) infinite;
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-/* start position-x = width of sprite sheet = frames * frame width */
-@keyframes sprite-animation {
-  0% {
-    background-position-x: calc(var(--frames) * var(--width));
-  }
-  100% {
-    background-position-x: 0;
-  }
+.elf.flipped {
+    transform: scaleX(-1);
 }
 
-/** animatedSprite container */
-.frame {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(var(--height) * var(--scale));
-}
-/** animation is split into keyframes and uses "steps" to iterate through keyframes */
-.animatedSprite {
-  animation: steps(var(--frames)) 1s infinite sprite-animation;
-  animation-duration: calc(1s / var(--fps) * var(--frames));
-  background-image: var(--sprite-sheet);
-  scale: var(--scale);
-  width: var(--width);
-  height: var(--height);
-  position: relative;
-  image-rendering: pixelated;
-  image-rendering: -mox-crisp-edges;
-  image-rendering: crisp-edges;
-  border-color: #eee6;
-  transition: filter 0.3s ease-in-out, border 0.1s, scale 0.3s ease-in-out;
-}
-/* slow motion "how it works" effect */
-.animatedSprite:hover {
-  animation-duration: calc(0.8s * var(--frames));
-  animation-timing-function: linear;
-  border: 2px solid #22222f33;
-  box-shadow: inset 0 0 5px #22222f;
-  border-radius: 30%;
-  filter: drop-shadow(0 2px 5px #22222f);
-}
-/* arrow slide effect */
-.animatedSprite::after {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  content: "<-----";
-  height: 100%;
-  width: 100%;
-  font-size: 15px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  opacity: 0;
-  filter: drop-shadow(0 0 2px #22222f);
-}
-.animatedSprite:hover::after {
-  animation-name: infoarrow;
-}
-@keyframes infoarrow {
-  0% {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  20% {
-    opacity: 0.4;
-  }
-  45% {
-    opacity: 0.4;
-    transform: translateX(-32px);
-  }
-  50%,
-  100% {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
+@keyframes idle {
+    0% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+    25% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
+    }
+    50% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
+    }
+    75% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
+    }
+    100% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
 }
 
-/** other styles */
-select {
-  color: #22222f;
-  font-size: 20px;
-  line-height: 20px;
-  font-family: "Pixelify Sans", sans-serif;
-  border: 2px solid #22222f;
-  background-color: #ffffff55;
-  padding: 10px 30px;
-  text-align: center;
-}
-h1,
-h2 {
-  margin: 5px 0;
+/* Flipped idle animation for when elf was moving left */
+@keyframes idle-flipped {
+    0% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+    25% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
+    }
+    50% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
+    }
+    75% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
+    }
+    100% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
 }
 
-/** globals */
-*,
-*:after {
-  box-sizing: border-box;
+.elf.flipped {
+    transform: scaleX(-1);
+    animation: idle-flipped 2s steps(5) infinite;
 }
-body {
-  margin: 0;
-  padding: 15px;
-  background-color: #aae;
-  text-align: center;
-  font-family: "Pixelify Sans", sans-serif;
+/* Walking animation */
+div.elf.idle {
+    animation: idle 2s steps(5) infinite;
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 
-  color: #22222f;
-  overflow-x: hidden;
+.elf.flipped {
+    transform: scaleX(-1);
+}
+
+@keyframes idle {
+    0% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+    25% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
+    }
+    50% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
+    }
+    75% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
+    }
+    100% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+}
+
+/* Flipped idle animation for when elf was moving left */
+@keyframes idle-flipped {
+    0% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+    25% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
+    }
+    50% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
+    }
+    75% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
+    }
+    100% {
+        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
+    }
+}
+
+.elf.flipped {
+    transform: scaleX(-1);
+    animation: idle-flipped 2s steps(5) infinite;
 }
 
 /* ==============================================
