@@ -506,9 +506,8 @@ body.orders-closed .game-info {
     transform: scale(0.97);
 }
 
-.station.in-range .station-icon {
-    /* Outline removed - interaction feedback now on elf */
-}
+
+
 
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
