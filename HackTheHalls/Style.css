@@ -425,6 +425,12 @@ body.orders-closed .game-info {
 }
 
 /* Walking animation states */
+.animatedSprite {
+    width: 64px;
+    height: 64px;
+    background-image: url("");
+}
+
 .elf.walk-up {
     background-image: var(--elf-sprite-up);
 }
