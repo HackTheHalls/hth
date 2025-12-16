@@ -81,12 +81,22 @@ export function checkStationProximity() {
     const dx = elf.x - putAreaCenterX;
     const dy = elf.y - putAreaCenterY;
     const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    const elfElement = document.querySelector('.elf');
     if (distance < interactionDistance) {
         putArea.classList.add('in-range');
+        elfElement.classList.add('can-interact');
         autoDepositIfCraftingNearby(nearestCraftStation, craftDistance);
         return { id: 'put-area', resource: 'delivery', distance };
     }
     putArea.classList.remove('in-range');
+
+    // Add can-interact class if near any station
+    if (nearestStation) {
+        elfElement.classList.add('can-interact');
+    } else {
+        elfElement.classList.remove('can-interact');
+    }
 
     autoDepositIfCraftingNearby(nearestCraftStation, craftDistance);
     return nearestStation;

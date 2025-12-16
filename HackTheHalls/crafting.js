@@ -70,7 +70,7 @@ function updateCraftingBenchSprite() {
     };
     
     const key = materials.join(',');
-    sprite.src = spriteMap[key] || 'imgs/WorkBench/woodWorkBench.png';
+    sprite.style.backgroundImage = `url('${spriteMap[key] || 'imgs/WorkBench/woodWorkBench.png'}')`;
 }
 
 export function updateCraftingTableDisplay() {

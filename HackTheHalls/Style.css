@@ -47,7 +47,7 @@ body {
     overflow: hidden;
     color: #2c1810;
     /* Outside snowy grass background */
-    background-image: url('imgs/snowyGrass.jpg');
+    background-image: url('imgs/Background/snowyGrass.jpg');
     background-size: 320px 320px; /* smaller tile size */
     background-repeat: repeat;
     background-position: center;
@@ -69,7 +69,7 @@ body {
     left: 60px;
     right: 60px;
     bottom: 60px;
-    background-image: url('imgs/woodenFloor.jpg');
+    background-image: url('imgs/Background/woodenFloor.jpg');
     background-size: 256px 256px; /* smaller repeating planks */
     background-repeat: repeat;
     background-position: center;
@@ -87,7 +87,7 @@ body {
     left: 60px;
     right: 60px;
     height: 24px; /* top border */
-    background-image: url('imgs/stoneWall.jpg');
+    background-image: url('imgs/Background/stoneWall.jpg');
     background-size: 128px 128px; /* tighter tiling */
     background-repeat: repeat;
     z-index: 1;
@@ -96,7 +96,7 @@ body {
 /* Use dedicated elements for other borders to avoid selector complexity */
 .wall-edge {
     position: absolute;
-    background-image: url('imgs/stoneWall.jpg');
+    background-image: url('imgs/Background/stoneWall.jpg');
     background-size: 128px 128px;
     background-repeat: repeat;
     z-index: 1;
@@ -397,6 +397,35 @@ body.orders-closed .game-info {
     font-size: clamp(58px, 8vw, 80px);
 }
 
+.elf::after {
+    content: 'E';
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #FFD700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.elf.can-interact::after {
+    opacity: 1;
+    animation: bounce-prompt 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes bounce-prompt {
+    from { transform: translateX(-50%) translateY(0); }
+    to { transform: translateX(-50%) translateY(-4px); }
+}
+
 .elf img {
     width: 100%;
     height: 100%;
@@ -404,27 +433,48 @@ body.orders-closed .game-info {
 }
 
 /* ==============================================
-   RESOURCE CRAFTING STATIONS
+   RESOURCE CRAFTING STATIONS - POSITIONED ALONG RIGHT WALL
    ============================================== */
 
 .resource-stations {
     position: absolute;
-    top: clamp(100px, 18vh, 160px);
-    right: 80px;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(30px, 6vh, 60px);
-    align-items: flex-end;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
     z-index: 3;
 }
 
 .station {
+    position: absolute;
     display: flex;
     align-items: center;
-    gap: clamp(10px, 1.5vw, 16px);
+    justify-content: center;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.3s;
-    position: relative;
+    pointer-events: auto;
+}
+
+/* Position each bench along the right wall */
+#wood-station {
+    top: 40px;
+    right: 20px;
+}
+
+#metal-station {
+    top: 205px;
+    right: 20px;
+}
+
+#fabric-station {
+    top: 365px;
+    right: 20px;
+}
+
+#cotton-station {
+    top: 510px;
+    right: 20px ;
 }
 
 .station .station-label {
@@ -457,9 +507,7 @@ body.orders-closed .game-info {
 }
 
 .station.in-range .station-icon {
-    border-color: #FFD700;
-    box-shadow: 0 0 18px rgba(255, 215, 0, 0.75);
-    animation: pulse 1s infinite;
+    /* Outline removed - interaction feedback now on elf */
 }
 
 @keyframes pulse {
@@ -474,24 +522,42 @@ body.orders-closed .game-info {
     text-transform: lowercase;
 }
 
+/* ⚙️ BENCH SIZE CONTROL - Resized to fit 4 benches vertically */
 .station-icon {
-    width: clamp(70px, 9vw, 110px);
-    height: clamp(70px, 9vw, 110px);
+    width: 180px;
+    height: 180px;  
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.station-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 6px;
-    mix-blend-mode: lighten;
+/* Individual bench images - Easy to add/remove/change */
+#wood-station .station-icon {
+    background-image: url('imgs/ItemBench/woodBench.png');
+}
+
+#metal-station .station-icon {
+    background-image: url('imgs/ItemBench/ironBench.png');
+}
+
+#fabric-station .station-icon {
+    background-image: url('imgs/ItemBench/fabricBench.png');
+}
+
+#cotton-station .station-icon {
+    background-image: url('imgs/ItemBench/cottenBench.png');
+}
+
+/* Crafting bench default */
+#crafting-bench-sprite {
+    background-image: url('imgs/WorkBench/woodWorkBench.png');
 }
 
 .station.tooltip::after {
@@ -539,6 +605,7 @@ body.orders-closed .game-info {
     font-size: clamp(24px, 3vw, 30px);
 }
 
+/* ⚙️ CRAFTING BENCH SIZE - Adjust these for crafting table scale */
 #crafting-station .station-icon {
     width: clamp(180px, 24vw, 240px);
     height: clamp(160px, 22vw, 210px);
@@ -684,24 +751,7 @@ body.orders-closed .game-info {
     border-top: 1px solid rgba(0,0,0,0.08);
 }
 
-/* ==============================================
-   RESPONSIVE DESIGN (Optional)
-   ============================================== */
 
-@media (max-width: 1200px) {
-    .resource-stations {
-        padding: 0 20px;
-    }
-    
-    .station-icon {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .station-label {
-        font-size: 20px;
-    }
-}
 
 /* ==============================================
    CUSTOM STYLES FOR NEW STATIONS

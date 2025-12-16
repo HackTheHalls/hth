@@ -1,6 +1,5 @@
 // Shared game state and utilities
-export const CONSTANTS = {
-    interactionDistance: 110,
+export const CONSTANTS = {    // ⚙️ ADJUST THIS to change interaction box size (smaller = must be closer)    interactionDistance: 150,
     elfMargin: 50,
     particlePoolSize: 24,
     floatingTextPoolSize: 16,
