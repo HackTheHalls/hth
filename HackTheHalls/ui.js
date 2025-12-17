@@ -8,9 +8,7 @@ export function updateTimer() {
 }
 
 export function updateDeliveryCounter() {
-    const currentConfig = levelConfig[gameState.level - 1];
-    const remaining = currentConfig.requiredDeliveries - gameState.currentLevelDeliveries;
-    document.getElementById('delivery-count').textContent = remaining;
+    document.getElementById('delivery-count').textContent = gameState.orderQueue.length;
 }
 
 export function updateLevelDisplay() {

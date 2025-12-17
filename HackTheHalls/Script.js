@@ -23,8 +23,10 @@ const gameState = {
         y: 300,
         speed: 280, // pixels per second (faster)
         carrying: null, // {type: 'resource', resource: 'wood'} or {type: 'crafted', toyName: 'train'}
-        width: 60,
-        height: 80
+        // 🔧 ELF HITBOX: Adjust width/height to change collision detection size
+        // Should be smaller than visual sprite size for better feel
+        width: 50,
+        height: 60
     },
     stations: {}, // Will store station positions
     blockers: [], // Collision rectangles for stations
@@ -150,9 +152,8 @@ function updateTimer() {
 // ==============================================
 
 function updateDeliveryCounter() {
-    const currentConfig = levelConfig[gameState.level - 1];
-    const remaining = currentConfig.requiredDeliveries - gameState.currentLevelDeliveries;
-    document.getElementById('delivery-count').textContent = remaining;
+    // Show the number of orders currently on the scroll
+    document.getElementById('delivery-count').textContent = gameState.orderQueue.length;
 }
 
 function completeDelivery() {
@@ -164,7 +165,7 @@ function completeDelivery() {
     if (gameState.currentLevelDeliveries >= currentConfig.requiredDeliveries) {
         levelComplete();
     } else {
-        generateNewOrder();
+        // Do not spawn a replacement order; leave the scroll list shrinking as orders are completed
     }
 }
 
@@ -216,10 +217,13 @@ function updateLevelDisplay() {
 }
 
 function generateNewOrder() {
-    if (gameState.orderQueue.length >= gameState.maxOrdersInQueue) {
+    const currentConfig = levelConfig[gameState.level - 1];
+    const remainingNeeded = currentConfig.requiredDeliveries - gameState.currentLevelDeliveries - gameState.orderQueue.length;
+
+    // Guard: do not exceed maxOrdersInQueue or the remaining deliveries required for this level
+    if (gameState.orderQueue.length >= gameState.maxOrdersInQueue || remainingNeeded <= 0) {
         return;
     }
-    const currentConfig = levelConfig[gameState.level - 1];
     const availableToys = currentConfig.availableToys.slice();
     // Prefer toys not already present to reduce duplicates
     const inQueueNames = new Set(gameState.orderQueue.map(o => o.toyName));
@@ -235,12 +239,16 @@ function generateNewOrder() {
     gameState.orderQueue.push(order);
     updateOrderDisplay();
     updateCraftingProgress();
+    updateDeliveryCounter();
 }
 
 function generateInitialOrders() {
-    for (let i = 0; i < gameState.maxOrdersInQueue; i++) {
+    const currentConfig = levelConfig[gameState.level - 1];
+    const initialCount = Math.min(gameState.maxOrdersInQueue, currentConfig.requiredDeliveries);
+    for (let i = 0; i < initialCount; i++) {
         generateNewOrder();
     }
+    updateDeliveryCounter();
 }
 
 function updateOrderDisplay() {
@@ -386,11 +394,11 @@ function updateElfPosition(deltaTime) {
     let dx = 0;
     let dy = 0;
     
-    // Check keyboard input
-    if (gameState.keys.w || gameState.keys.ArrowUp) dy -= 1;
-    if (gameState.keys.s || gameState.keys.ArrowDown) dy += 1;
-    if (gameState.keys.a || gameState.keys.ArrowLeft) dx -= 1;
-    if (gameState.keys.d || gameState.keys.ArrowRight) dx += 1;
+    // WASD-only movement
+    if (gameState.keys.w) dy -= 1;
+    if (gameState.keys.s) dy += 1;
+    if (gameState.keys.a) dx -= 1;
+    if (gameState.keys.d) dx += 1;
     
     // Normalize diagonal movement
     if (dx !== 0 && dy !== 0) {
@@ -413,7 +421,27 @@ function updateElfPosition(deltaTime) {
     
     // Update visual position
     const elfElement = document.querySelector('.elf');
-    elfElement.style.transform = `translate(${elf.x}px, ${elf.y}px)`;
+    elfElement.style.left = `${elf.x}px`;
+    elfElement.style.top = `${elf.y}px`;
+
+    // Update animation state and facing
+    const moving = (dx !== 0 || dy !== 0);
+    if (!gameState.elf.facing) gameState.elf.facing = 'down';
+
+    if (moving) {
+        elfElement.classList.add('is-walking');
+        elfElement.classList.remove('is-idle');
+        if (gameState.keys.w && !gameState.keys.s) gameState.elf.facing = 'up';
+        if (gameState.keys.s && !gameState.keys.w) gameState.elf.facing = 'down';
+        if (gameState.keys.a && !gameState.keys.d) gameState.elf.facing = 'left';
+        if (gameState.keys.d && !gameState.keys.a) gameState.elf.facing = 'right';
+    } else {
+        elfElement.classList.remove('is-walking');
+        elfElement.classList.add('is-idle');
+    }
+
+    ['is-up','is-down','is-left','is-right'].forEach(c => elfElement.classList.remove(c));
+    elfElement.classList.add(`is-${gameState.elf.facing}`);
 }
 
 function resolveCollisions(prevX, prevY) {
@@ -448,7 +476,8 @@ function resolveCollisions(prevX, prevY) {
     }
     // Update position after resolution
     const elfElement = document.querySelector('.elf');
-    elfElement.style.transform = `translate(${elf.x}px, ${elf.y}px)`;
+    elfElement.style.left = `${elf.x}px`;
+    elfElement.style.top = `${elf.y}px`;
 }
 
 function rectIntersect(a, b) {
@@ -681,6 +710,7 @@ function deliverToy(toyName) {
         updateCarryingDisplay();
         updateOrderDisplay();
         updateCraftingProgress();
+        updateDeliveryCounter();
         completeDelivery();
         spawnFloatingText('Delivered!', gameState.elf.x, gameState.elf.y - 10);
         spawnParticles(gameState.elf.x, gameState.elf.y);
@@ -808,15 +838,96 @@ function initStationPositions() {
             h: rect.height
         };
 
-        // Add smaller blocker for collision based on icon only (labels won't block)
-        const inset = Math.min(rect.width, rect.height) * 0.25; // shrink hitbox by 25%
+        // 🔧 COLLISION HITBOX CONFIGURATION
+        // Higher percentage = smaller hitbox (easier to get close)
+        // Lower percentage = larger hitbox (harder to get close)
+        
+        let inset;
+        let yOffset = 0;
+        let xOffset = 0;
+        let heightExtension = 0;
+        if (stationId === 'crafting-station') {
+            // 🔧 WORKBENCH HITBOX: Adjust this value to change workbench collision size
+            // Current: 50% inset (smaller hitbox width)
+            inset = Math.min(rect.width, rect.height) * 0.50;
+            // 🔧 WORKBENCH VERTICAL OFFSET: Negative value moves hitbox UP, positive moves DOWN
+            yOffset = rect.height * -0.30; // Move hitbox up 30% to align with blueprint/work surface
+            // 🔧 WORKBENCH HORIZONTAL OFFSET: Negative value moves hitbox LEFT, positive moves RIGHT
+            xOffset = rect.width * -0.10; // Adjust to move left/right
+            // 🔧 WORKBENCH HEIGHT EXTENSION: Positive value makes hitbox taller downwards
+            heightExtension = rect.height * 0.60; // Extend hitbox downward 60%
+        } else {
+            // Resource benches: 30% inset for tighter fit
+            inset = Math.min(rect.width, rect.height) * 0.30;
+        }
+        
         gameState.blockers.push({
-            x: rect.left + inset,
-            y: rect.top + inset,
+            x: rect.left + inset + xOffset,
+            y: rect.top + inset + yOffset,
             w: rect.width - inset * 2,
-            h: rect.height - inset * 2
+            h: rect.height - inset * 2 + heightExtension
         });
     });
+    
+    // 🔧 SANTA'S SACK COLLISION HITBOX
+    const putArea = document.querySelector('.put-area');
+    if (putArea) {
+        const putRect = putArea.getBoundingClientRect();
+        // Adjust inset to match the actual sack sprite shape (0.35 = 35% inset)
+        const inset = Math.min(putRect.width, putRect.height) * 0.35;
+        gameState.blockers.push({
+            x: putRect.left + inset,
+            y: putRect.top + inset,
+            w: putRect.width - inset * 2,
+            h: putRect.height - inset * 2
+        });
+    }
+
+    // 🔧 WALL COLLISIONS (Stone boundaries - bottom, left, right)
+    // 🔧 WALL EXPANSION: Adjust these values to make walls thicker/extend further inward
+    const wallExpansion = {
+        bottom: 50,   // Pixels to extend bottom wall upward (positive = thicker)
+        left: 0,     // Pixels to extend left wall rightward
+        right: 0,    // Pixels to extend right wall leftward
+        top: 0       // Pixels to extend top edge downward
+    };
+    
+    const walls = document.querySelectorAll('.wall-edge');
+    walls.forEach(wall => {
+        const wallRect = wall.getBoundingClientRect();
+        let expansion = 0;
+        
+        if (wall.classList.contains('bottom')) expansion = wallExpansion.bottom;
+        else if (wall.classList.contains('left')) expansion = wallExpansion.left;
+        else if (wall.classList.contains('right')) expansion = wallExpansion.right;
+        
+        gameState.blockers.push({
+            x: wallRect.left - (wall.classList.contains('left') ? expansion : 0),
+            y: wallRect.top - (wall.classList.contains('bottom') ? expansion : 0),
+            w: wallRect.width + (wall.classList.contains('left') || wall.classList.contains('right') ? expansion : 0),
+            h: wallRect.height + (wall.classList.contains('bottom') ? expansion : 0)
+        });
+    });
+
+    // 🔧 SCREEN EDGE BOUNDARIES (Prevent going outside viewport)
+    // 🔧 EDGE INSET: Adjust this value to create padding from screen edges
+    const edgeInset = 0; // Pixels inward from screen edge (0 = at edge, 50 = 50px from edge)
+    
+    const gameContainer = document.querySelector('.game-container');
+    if (gameContainer) {
+        const containerRect = gameContainer.getBoundingClientRect();
+        // Add invisible walls at screen edges with configurable inset
+        gameState.blockers.push(
+            // Top edge
+            { x: edgeInset, y: edgeInset, w: window.innerWidth - edgeInset * 2, h: 1 },
+            // Bottom edge
+            { x: edgeInset, y: window.innerHeight - edgeInset - 1, w: window.innerWidth - edgeInset * 2, h: 1 },
+            // Left edge
+            { x: edgeInset, y: edgeInset, w: 1, h: window.innerHeight - edgeInset * 2 },
+            // Right edge
+            { x: window.innerWidth - edgeInset - 1, y: edgeInset, w: 1, h: window.innerHeight - edgeInset * 2 }
+        );
+    }
 }
 
 function initGame() {
@@ -830,7 +941,9 @@ function initGame() {
     gameState.elf.x = window.innerWidth / 2;
     gameState.elf.y = window.innerHeight / 2;
     const elfElement = document.querySelector('.elf');
-    elfElement.style.transform = `translate(${gameState.elf.x}px, ${gameState.elf.y}px)`;
+    elfElement.style.left = `${gameState.elf.x}px`;
+    elfElement.style.top = `${gameState.elf.y}px`;
+    elfElement.classList.add('is-idle', 'is-down');
     
     // Defer orders until difficulty selected
     
@@ -856,8 +969,12 @@ document.addEventListener('keydown', (e) => {
         const rules = document.getElementById('rules-overlay');
         if (rules && rules.style.display !== 'none') {
             rules.style.display = 'none';
+            rules.setAttribute('aria-hidden', 'true');
             const startOverlay = document.getElementById('start-overlay');
-            if (startOverlay) startOverlay.style.display = 'flex';
+            if (startOverlay) {
+                startOverlay.style.display = 'flex';
+                startOverlay.setAttribute('aria-hidden', 'false');
+            }
         }
     }
 });
@@ -919,7 +1036,10 @@ function startGameWithDifficulty(diff) {
     
     // Hide overlay
     const overlay = document.getElementById('start-overlay');
-    if (overlay) overlay.style.display = 'none';
+    if (overlay) {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+    }
     
     // Start loop and timer
     gameState.isGameRunning = true;

@@ -22,17 +22,20 @@ export function resolveCollisions(prevX, prevY) {
         }
     }
     const elfElement = document.querySelector('.elf');
-    elfElement.style.transform = `translate(${elf.x}px, ${elf.y}px)`;
+    // Use left/top instead of transform to avoid overriding CSS flip (scaleX) for left-facing
+    elfElement.style.left = `${elf.x}px`;
+    elfElement.style.top = `${elf.y}px`;
 }
 
 export function updateElfPosition(deltaTime) {
     const elf = gameState.elf;
     let dx = 0;
     let dy = 0;
-    if (gameState.keys.w || gameState.keys.ArrowUp) dy -= 1;
-    if (gameState.keys.s || gameState.keys.ArrowDown) dy += 1;
-    if (gameState.keys.a || gameState.keys.ArrowLeft) dx -= 1;
-    if (gameState.keys.d || gameState.keys.ArrowRight) dx += 1;
+    // WASD-only movement
+    if (gameState.keys.w) dy -= 1;
+    if (gameState.keys.s) dy += 1;
+    if (gameState.keys.a) dx -= 1;
+    if (gameState.keys.d) dx += 1;
     if (dx !== 0 && dy !== 0) {
         dx *= 0.707;
         dy *= 0.707;
@@ -43,6 +46,28 @@ export function updateElfPosition(deltaTime) {
     elf.x = Math.max(margin, Math.min(window.innerWidth - margin - elf.width, elf.x));
     elf.y = Math.max(margin, Math.min(window.innerHeight - margin - elf.height, elf.y));
     resolveCollisions();
+
+    // Update animation state and direction classes
+    const elfElement = document.querySelector('.elf');
+    const moving = (Math.abs(dx) > 0 || Math.abs(dy) > 0);
+    if (!elf.facing) elf.facing = 'down';
+
+    if (moving) {
+        elfElement.classList.add('is-walking');
+        elfElement.classList.remove('is-idle');
+
+        // Prioritize last input direction for facing
+        if (gameState.keys.w && !gameState.keys.s) elf.facing = 'up';
+        if (gameState.keys.s && !gameState.keys.w) elf.facing = 'down';
+        if (gameState.keys.a && !gameState.keys.d) elf.facing = 'left';
+        if (gameState.keys.d && !gameState.keys.a) elf.facing = 'right';
+    } else {
+        elfElement.classList.remove('is-walking');
+        elfElement.classList.add('is-idle');
+    }
+
+    ['is-up', 'is-down', 'is-left', 'is-right'].forEach(c => elfElement.classList.remove(c));
+    elfElement.classList.add(`is-${elf.facing}`);
     checkStationProximity();
 }
 

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elf Workshop Game</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
@@ -14,7 +15,7 @@
         <div class="wall-edge right" aria-hidden="true"></div>
         
         <!-- Rules Overlay: Press Enter to continue -->
-        <div class="rules-overlay" id="rules-overlay" role="dialog" aria-modal="true">
+        <div class="rules-overlay" id="rules-overlay" role="dialog" aria-modal="true" aria-hidden="false">
             <div class="overlay-card">
                 <h2>Workshop Rules</h2>
                 <ul class="rules-list">
@@ -27,7 +28,7 @@
             </div>
         </div>
         <!-- Start Overlay: Difficulty Selection -->
-        <div class="start-overlay" id="start-overlay" role="dialog" aria-modal="true">
+        <div class="start-overlay" id="start-overlay" role="dialog" aria-modal="true" aria-hidden="false">
             <div class="overlay-card">
                 <h2>Select Difficulty</h2>
                 <div class="difficulty-buttons">
@@ -53,7 +54,6 @@
 
         <!-- Recipe/Order Card -->
         <div class="recipe-card" id="recipe-card" aria-expanded="true">
-            <div class="santa-hat"></div>
             <h3 class="recipe-title" id="recipe-title">Orders (click to toggle)</h3>
             <div class="recipe-scroll" id="recipe-scroll">
                 <!-- Toy: Train -->
@@ -111,10 +111,22 @@
         </div>
 
         <!-- Elf Character (placeholder) -->
-        <div class="elf" aria-label="Elf player">
-            <!-- Place your elf sprite here -->
-            <!-- Example: <img src="Assets/elf.png" alt="Elf" /> -->
-        </div>
+        <div class="elf is-idle is-down" aria-label="Elf player"></div>
+
+        <!-- Christmas Tree Decoration -->
+        <div class="christmas-tree" aria-hidden="true"></div>
+
+        <!-- Christmas Presents Decoration -->
+        <div class="christmas-presents" aria-hidden="true"></div>
+
+        <!-- Christmas Lights Decoration -->
+        <div class="christmas-lights" aria-hidden="true"></div>
+
+        <!-- Shelves Decoration -->
+        <div class="shelves" aria-hidden="true"></div>
+
+        <!-- Upside-down Shelves Decoration -->
+        <div class="upsidedown-shelves" aria-hidden="true"></div>
 
         <!-- Resource Crafting Stations -->
         <div class="resource-stations">

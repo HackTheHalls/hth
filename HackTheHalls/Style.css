@@ -8,12 +8,17 @@
     z-index: 1200;
 }
 
-/* Hide game elements when rules overlay is visible */
-.rules-overlay ~ * .game-info,
-.rules-overlay ~ * .recipe-card,
-.rules-overlay ~ * .put-area,
-.rules-overlay ~ * .elf,
-.rules-overlay ~ * .resource-stations {
+/* Hide game elements only when rules overlay is active */
+.rules-overlay[aria-hidden="false"] ~ * .game-info,
+.rules-overlay[aria-hidden="false"] ~ * .recipe-card,
+.rules-overlay[aria-hidden="false"] ~ * .put-area,
+.rules-overlay[aria-hidden="false"] ~ * .elf,
+.rules-overlay[aria-hidden="false"] ~ * .resource-stations,
+.rules-overlay[aria-hidden="false"] ~ * .christmas-tree,
+.rules-overlay[aria-hidden="false"] ~ * .christmas-presents,
+.rules-overlay[aria-hidden="false"] ~ * .christmas-lights,
+.rules-overlay[aria-hidden="false"] ~ * .shelves,
+.rules-overlay[aria-hidden="false"] ~ * .upsidedown-shelves {
     display: none;
 }
 
@@ -122,12 +127,17 @@ body {
     z-index: 1100;
 }
 
-/* Hide game elements when start overlay is visible */
-.start-overlay ~ * .game-info,
-.start-overlay ~ * .recipe-card,
-.start-overlay ~ * .put-area,
-.start-overlay ~ * .elf,
-.start-overlay ~ * .resource-stations {
+/* Hide game elements only when start overlay is active */
+.start-overlay[aria-hidden="false"] ~ * .game-info,
+.start-overlay[aria-hidden="false"] ~ * .recipe-card,
+.start-overlay[aria-hidden="false"] ~ * .put-area,
+.start-overlay[aria-hidden="false"] ~ * .elf,
+.start-overlay[aria-hidden="false"] ~ * .resource-stations,
+.start-overlay[aria-hidden="false"] ~ * .christmas-tree,
+.start-overlay[aria-hidden="false"] ~ * .christmas-presents,
+.start-overlay[aria-hidden="false"] ~ * .christmas-lights,
+.start-overlay[aria-hidden="false"] ~ * .shelves,
+.start-overlay[aria-hidden="false"] ~ * .upsidedown-shelves {
     display: none;
 }
 
@@ -176,7 +186,7 @@ body {
 .game-info {
     position: absolute;
     top: 20px;
-    left: calc(20px + clamp(180px, 18vw, 240px) + 40px);
+    left: calc(10px + clamp(180px, 18vw, 240px) + 15px);
     font-size: clamp(20px, 2.4vw, 26px);
     font-weight: 600;
     z-index: 10;
@@ -237,54 +247,68 @@ body.orders-closed .game-info {
    RECIPE/ORDER CARD SECTION
    ============================================== */
 
+/* ==============================================
+   RECIPE CARD - Sprite Background
+   ADD YOUR SPRITES HERE:
+   - Default (open): imgs/Background/UI/scrollOpen.png
+   - Closed: imgs/UI/scrollClosed.png
+   ============================================== */
 .recipe-card {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    width: clamp(180px, 18vw, 240px);
-    background: linear-gradient(180deg, #f6e5c3 0%, #f0d7a6 100%);
-    border: 3px solid #c09a5a;
-    border-radius: 8px;
-    padding: 14px 14px 10px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    /* 🔧 OPEN SCROLL POSITION - Move left/right/up/down when expanded */
+    top: 10px;
+    left: 40px;
+    /* 🔧 OPEN SCROLL SIZE - Adjust width/height to match your scroll sprite */
+    width: 200px;
+    height: 250px;
+    border: 2px solid red;
     z-index: 10;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 200;
+    font-family: 'Pixelify Sans', sans-serif;
 }
 
-.santa-hat {
-    position: absolute;
-    top: -18px;
-    right: -14px;
-    width: clamp(55px, 6vw, 70px);
-    height: clamp(55px, 6vw, 70px);
-    background: linear-gradient(135deg, #c2001a 0%, #ff2a3c 80%);
-    border-radius: 50% 50% 10% 10%;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-}
-
-.santa-hat::after {
+.recipe-card::before {
     content: '';
     position: absolute;
-    bottom: -10px;
-    right: 8px;
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    /* 🔧 SCROLL SPRITE OFFSET - Adjust to align sprite with red box */
+    top: -45px;
+    right: -205px;
+    bottom: -75px;
+    height : 400px;
+    width: 600px;
+    background-image: url('imgs/Background/UI/scrollOpen.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: inherit;
+    z-index: -1;
 }
 
-.recipe-scroll {
-    background: transparent;
-    border: none;
-    padding: 0;
-    font-size: 18px;
-    line-height: 1.5;
-    color: #2c1810;
+/* Closed state */
+#recipe-card[aria-expanded="false"] {
+    /* 🔧 CLOSED SCROLL POSITION - Move left/right/up/down when collapsed */
+    top: 20px;
+    left: 20px;
+    /* 🔧 CLOSED SCROLL SIZE - Adjust when collapsed/closed */
+    width: clamp(160px, 15vw, 200px);
+    min-height: 100px;
 }
+
+#recipe-card[aria-expanded="false"]::before {
+    background-image: url('imgs/UI/scrollClosed.png');
+}
+
+
+
+
 
 .recipe-item {
-    margin-bottom: 14px;
-    padding-bottom: 8px;
+    margin-bottom: 5px;
+    padding-bottom: 0px;
     border-bottom: 1px dashed #a3753f;
 }
 
@@ -294,16 +318,21 @@ body.orders-closed .game-info {
 }
 
 .recipe-item-name {
-    font-weight: 700;
-    color: #8b4513;
-    font-size: clamp(18px, 2vw, 20px);
+    font-size: 35px;
+    font-weight: 100;
+    color: #000000;
+    text-align: center;
+    margin-top: 0px;
 }
 
 .materials {
     margin-left: 6px;
     margin-top: 4px;
-    color: #2c1810;
-    font-size: clamp(15px, 1.8vw, 18px);
+    color: #ff0000;
+    font-size: 25px;
+    font-weight: 500;
+    text-align: left;
+    margin-top: 0px;
 }
 
 /* ==============================================
@@ -326,38 +355,36 @@ body.orders-closed .game-info {
 */
 
 /* ==============================================
-   PUT AREA
+   PUT AREA (Santa's Sack Delivery Zone)
    ============================================== */
 
 .put-area {
     position: absolute;
-    top: calc(20px + clamp(360px, 45vh, 440px));
-    left: 20px;
-    width: clamp(150px, 18vw, 220px);
-    height: clamp(110px, 15vh, 150px);
-    background: repeating-linear-gradient(
-        90deg,
-        #f6f6f6,
-        #f6f6f6 6px,
-        #d0d0d0 6px,
-        #d0d0d0 12px
-    );
-    border: 4px solid #b36a2d;
-    border-radius: 6px;
+    /* 🔧 POSITION: Adjust top/left to move the sack */
+    top: calc(-150px + clamp(360px, 45vh, 440px));
+    left: 10px;
+    
+    /* 🔧 SIZE: Adjust width/height to scale the sack sprite */
+    width: clamp(420px, 40vw, 420px);
+    height: clamp(300px, 25vw, 320px);
+    
+    background-image: url('imgs/Toys/santaSack.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: clamp(18px, 2vw, 22px);
     font-weight: 600;
-    color: #2c1810;
+    color: transparent;
     z-index: 3;
     transition: all 0.3s;
 }
 
 .put-area.in-range {
-    background: rgba(255, 215, 0, 0.35);
-    border-color: #FFD700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
 }
 
 .put-area.delivered {
@@ -369,123 +396,160 @@ body.orders-closed .game-info {
     50% { transform: scale(1.06); box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
     100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0.2); }
 }
+
 /* ==============================================
-   ELF CHARACTER WITH SPRITE ANIMATION
+   🎄 CHRISTMAS TREE DECORATION
+   ============================================== */
+
+.christmas-tree {
+    position: absolute;
+    
+    /* 🔧 TREE POSITION: Adjust top/left to move the tree */
+    top: -90px;
+    left: 35%;
+    transform: translateX(-50%);
+    
+    /* 🔧 TREE SIZE: Adjust width/height to scale the tree sprite */
+    width: clamp(450px, 45vw, 450px);
+    height: clamp(450px, 45vw, 450px);
+    
+    background-image: url('imgs/Background/Christmas tree.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none; /* Allow clicking through the tree */
+}
+
+/* ==============================================
+   🎁 CHRISTMAS PRESENTS DECORATION
+   ============================================== */
+
+.christmas-presents {
+    position: absolute;
+    
+    /* 🔧 PRESENTS POSITION: Adjust top/right to move the presents */
+    top:-25px;
+    right:550px;
+    
+    
+    /* 🔧 PRESENTS SIZE: Adjust width/height to scale the presents sprite */
+    width: clamp(275px, 18vw, 275px);
+    height: clamp(275px, 18vw, 275px);
+    
+    background-image: url('imgs/Toys/christmasPresents.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none; /* Allow clicking through the presents */
+}
+
+/* ==============================================   📋 SHELVES DECORATION
+   ============================================== */
+
+.shelves {
+    position: absolute;
+    
+    /* 🔧 SHELVES POSITION: Adjust top/left to move the shelves */
+    top: -80px;
+    left: 1000px;
+    
+    /* 🔧 SHELVES SIZE: Adjust width/height to scale the shelves sprite */
+    width: clamp(400px, 25vw, 400px);
+    height: clamp(400px, 25vw, 400px);
+    
+    background-image: url('imgs/Background/UI/Shevles.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none; /* Allow clicking through the shelves */
+}
+
+/* ==============================================
+   🔃 UPSIDE-DOWN SHELVES DECORATION
+   ============================================== */
+
+.upsidedown-shelves {
+    position: absolute;
+    
+    /* 🔧 UPSIDE-DOWN SHELVES POSITION: Adjust top/right to move the shelves */
+    top: 400px;
+    right: 1100px;
+    
+    /* 🔧 UPSIDE-DOWN SHELVES SIZE: Adjust width/height to scale the shelves sprite */
+    width: clamp(400px, 25vw, 400px);
+    height: clamp(400px, 25vw, 400px);
+    
+    background-image: url('imgs/Background/UI/Upsidedown shelves.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none; /* Allow clicking through the shelves */
+}
+
+/* ==============================================   ELF CHARACTER WITH SPRITE ANIMATION
    ============================================== */
 
 /* CSS Variables for sprite animation */
-/* Idle animation */
-div.elf.idle {
-    animation: idle 2s steps(5) infinite;
+/* Base Elf Styles */
+div.elf {
     position: absolute;
+    /* 🔧 SIZE: Adjust width/height to scale the elf sprite */
     width: 120px;
     height: 120px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    z-index: 5;
 }
 
-.elf.flipped {
-    transform: scaleX(-1);
+/* Idle State */
+.elf.is-idle.is-right { animation: idle-right 1.2s linear infinite; }
+.elf.is-idle.is-left  { animation: idle-right 1.2s linear infinite; transform: scaleX(-1); transform-origin: center; }
+.elf.is-idle.is-up    { animation: idle-right 1.2s linear infinite; }
+.elf.is-idle.is-down  { animation: idle-right 1.2s linear infinite; }
+
+/* Walking State */
+.elf.is-walking.is-right { animation: walk-right 0.6s linear infinite; }
+.elf.is-walking.is-left  { animation: walk-right 0.6s linear infinite; transform: scaleX(-1); transform-origin: center; }
+.elf.is-walking.is-up    { animation: walk-up    0.6s linear infinite; }
+.elf.is-walking.is-down  { animation: walk-down  0.6s linear infinite; }
+ 
+@keyframes walk-right {
+    0%   { background-image: url("imgs/Charcater/noItem/walkingRight/Frame1.png"); }
+    25%  { background-image: url("imgs/Charcater/noItem/walkingRight/Frame2.png"); }
+    50%  { background-image: url("imgs/Charcater/noItem/walkingRight/Frame3.png"); }
+    75%  { background-image: url("imgs/Charcater/noItem/walkingRight/Frame4.png"); }
+    100% { background-image: url("imgs/Charcater/noItem/walkingRight/Frame1.png"); }
 }
 
-@keyframes idle {
-    0% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-    25% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
-    }
-    50% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
-    }
-    75% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
-    }
-    100% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
+@keyframes walk-up {
+    0%   { background-image: url("imgs/Charcater/noItem/walkingUp/walkUp1.png"); }
+    25%  { background-image: url("imgs/Charcater/noItem/walkingUp/walkUp2.png"); }
+    50%  { background-image: url("imgs/Charcater/noItem/walkingUp/walkUp3.png"); }
+    75%  { background-image: url("imgs/Charcater/noItem/walkingUp/walkUp4.png"); }
+    100% { background-image: url("imgs/Charcater/noItem/walkingUp/walkUp1.png"); }
 }
 
-/* Flipped idle animation for when elf was moving left */
-@keyframes idle-flipped {
-    0% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-    25% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
-    }
-    50% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
-    }
-    75% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
-    }
-    100% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
+@keyframes walk-down {
+    0%   { background-image: url("imgs/Charcater/noItem/walkingDown/Frame1.png"); }
+    25%  { background-image: url("imgs/Charcater/noItem/walkingDown/Frame2.png"); }
+    50%  { background-image: url("imgs/Charcater/noItem/walkingDown/Frame3.png"); }
+    75%  { background-image: url("imgs/Charcater/noItem/walkingDown/Frame4.png"); }
+    100% { background-image: url("imgs/Charcater/noItem/walkingDown/Frame1.png"); }
 }
 
-.elf.flipped {
-    transform: scaleX(-1);
-    animation: idle-flipped 2s steps(5) infinite;
-}
-/* Walking animation */
-div.elf.idle {
-    animation: idle 2s steps(5) infinite;
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+@keyframes idle-right {
+    0%   { background-image: url("imgs/Charcater/noItem/Idle/Idle1.png"); }
+    25%  { background-image: url("imgs/Charcater/noItem/Idle/Idle2.png"); }
+    50%  { background-image: url("imgs/Charcater/noItem/Idle/Idle3.png"); }
+    75%  { background-image: url("imgs/Charcater/noItem/Idle/Idle4.png"); }
+    100% { background-image: url("imgs/Charcater/noItem/Idle/Idle1.png"); }
 }
 
-.elf.flipped {
-    transform: scaleX(-1);
-}
-
-@keyframes idle {
-    0% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-    25% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
-    }
-    50% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
-    }
-    75% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
-    }
-    100% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-}
-
-/* Flipped idle animation for when elf was moving left */
-@keyframes idle-flipped {
-    0% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-    25% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle2.png);
-    }
-    50% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle3.png);
-    }
-    75% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/idle4.png);
-    }
-    100% {
-        background-image: url(/hth/HackTheHalls/imgs/Charcater/noItem/Idle/Idle1.png);
-    }
-}
-
-.elf.flipped {
-    transform: scaleX(-1);
-    animation: idle-flipped 2s steps(5) infinite;
-}
 
 /* ==============================================
    RESOURCE CRAFTING STATIONS - POSITIONED ALONG RIGHT WALL
@@ -511,7 +575,7 @@ div.elf.idle {
     pointer-events: auto;
 }
 
-/* Position each bench along the right wall */
+/* 🔧 POSITION: Adjust top/right values to move resource stations along the wall */
 #wood-station {
     top: 40px;
     right: 20px;
@@ -529,7 +593,7 @@ div.elf.idle {
 
 #cotton-station {
     top: 510px;
-    right: 20px ;
+    right: 20px;
 }
 
 .station .station-label {
@@ -576,8 +640,9 @@ div.elf.idle {
     text-transform: lowercase;
 }
 
-/* ⚙️ BENCH SIZE CONTROL - Resized to fit 4 benches vertically */
+/* ⚙️ RESOURCE BENCH SIZE CONTROL */
 .station-icon {
+    /* 🔧 SIZE: Adjust width/height to scale all resource benches */
     width: 180px;
     height: 180px;  
     background: transparent;
@@ -611,14 +676,15 @@ div.elf.idle {
 
 /* Crafting bench default */
 #crafting-bench-sprite {
-    background-image: url('imgs/WorkBench/woodWorkBench.png');
+    background-image: url('imgs/WorkBench/Bench.png');
 }
 
 .station.tooltip::after {
     content: attr(data-tip);
     position: absolute;
-    top: -28px;
-    right: 0;
+    top: -40px;
+    right: 20%;
+    transform: translateX(50%);
     background: #fff7e6;
     border: 1px solid #c09a5a;
     padding: 4px 8px;
@@ -636,7 +702,12 @@ div.elf.idle {
 .station.tooltip:hover::after,
 .station.in-range::after {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(30%);
+}
+
+/* Station In-Range Glow Effect */
+.station.in-range .station-icon {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
 }
 
 /* Station Active State */
@@ -645,11 +716,16 @@ div.elf.idle {
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.55);
 }
 
-/* Crafting station prominent placement */
+/* ==============================================
+   🔧 CRAFTING WORKBENCH (Main Crafting Station)
+   ============================================== */
 #crafting-station {
     position: fixed;
-    bottom: clamp(40px, 8vh, 80px);
-    left: 50%;
+    
+    /* 🔧 WORKBENCH POSITION: Change bottom value to move vertically */
+    /* Horizontal position is auto-centered (left: 50%) */
+    bottom: clamp(15px, 1vh, 30px);
+    left: 60%;
     transform: translateX(-50%);
     gap: 10px;
     z-index: 9;
@@ -659,10 +735,10 @@ div.elf.idle {
     font-size: clamp(24px, 3vw, 30px);
 }
 
-/* ⚙️ CRAFTING BENCH SIZE - Adjust these for crafting table scale */
+/* 🔧 WORKBENCH SPRITE SIZE: Adjust to scale the workbench sprite */
 #crafting-station .station-icon {
-    width: clamp(180px, 24vw, 240px);
-    height: clamp(160px, 22vw, 210px);
+    width: clamp(300px, 30vw, 420px);
+    height: clamp(200px, 25vw, 250px);
 }
 
 .crafting-contents {
@@ -782,27 +858,15 @@ div.elf.idle {
 }
 
 .crafting-progress {
-    margin-top: 8px;
-    width: clamp(180px, 24vw, 240px);
-    background: rgba(0,0,0,0.08);
-    border: 2px solid #c09a5a;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    display: none; /* Hidden - UI box removed */
 }
 
 .crafting-progress-bar {
-    height: 12px;
-    width: 0%;
-    background: linear-gradient(90deg, #4caf50, #8bc34a);
-    transition: width 0.25s ease;
+    display: none;
 }
 
 .crafting-needs {
-    padding: 6px 8px;
-    font-size: 13px;
-    background: rgba(255,255,255,0.9);
-    border-top: 1px solid rgba(0,0,0,0.08);
+    display: none;
 }
 
 
