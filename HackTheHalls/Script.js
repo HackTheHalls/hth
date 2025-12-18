@@ -161,11 +161,12 @@ function completeDelivery() {
     gameState.totalDeliveries++;
     updateDeliveryCounter();
     
-    const currentConfig = levelConfig[gameState.level - 1];
-    if (gameState.currentLevelDeliveries >= currentConfig.requiredDeliveries) {
+    console.log(`Delivered! Total this level: ${gameState.currentLevelDeliveries}`);
+    
+    // Check if all orders on scroll are cleared
+    if (gameState.orderQueue.length === 0) {
+        console.log('All orders delivered! Moving to next level...');
         levelComplete();
-    } else {
-        // Do not spawn a replacement order; leave the scroll list shrinking as orders are completed
     }
 }
 
@@ -203,6 +204,13 @@ function levelComplete() {
     gameState.orderQueue = [];
     generateInitialOrders();
     
+    // Reset elf position to center of screen
+    gameState.elf.x = window.innerWidth / 2;
+    gameState.elf.y = window.innerHeight / 2;
+    const elfElement = document.querySelector('.elf');
+    elfElement.style.left = `${gameState.elf.x}px`;
+    elfElement.style.top = `${gameState.elf.y}px`;
+    
     updateDeliveryCounter();
     updateTimer();
     updateLevelDisplay();
@@ -214,6 +222,14 @@ function levelComplete() {
 
 function updateLevelDisplay() {
     document.getElementById('level-value').textContent = gameState.level;
+}
+
+function capitalizeToyName(toyName) {
+    // Convert hyphenated toy names to proper capitalization
+    return toyName
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 function generateNewOrder() {
@@ -262,7 +278,7 @@ function updateOrderDisplay() {
         
         const itemName = document.createElement('div');
         itemName.className = 'recipe-item-name';
-        itemName.textContent = `Item: ${order.toyName}`;
+        itemName.textContent = `Item: ${capitalizeToyName(order.toyName)}`;
         
         const materials = document.createElement('div');
         materials.className = 'materials';
@@ -658,9 +674,9 @@ function attemptCrafting() {
             spawnFloatingText('Crafted!', gameState.elf.x, gameState.elf.y - 10);
             spawnParticles(gameState.elf.x, gameState.elf.y);
             playSound('craft');
-            announce(`Crafted ${order.toyName}`);
+            announce(`Crafted ${capitalizeToyName(order.toyName)}`);
             
-            console.log(`Crafted ${order.toyName}!`);
+            console.log(`Crafted ${capitalizeToyName(order.toyName)}!`);
             return;
         }
     }
@@ -715,8 +731,8 @@ function deliverToy(toyName) {
         spawnFloatingText('Delivered!', gameState.elf.x, gameState.elf.y - 10);
         spawnParticles(gameState.elf.x, gameState.elf.y);
         playSound('deliver');
-        announce(`Delivered ${toyName}`);
-        console.log(`Delivered: ${toyName}`);
+        announce(`Delivered ${capitalizeToyName(toyName)}`);
+        console.log(`Delivered: ${capitalizeToyName(toyName)}`);
     } else {
         console.log(`No order for ${toyName}!`);
     }
@@ -726,9 +742,10 @@ function updateCarryingDisplay() {
     const carryingDisplay = document.getElementById('carrying-display');
     if (gameState.elf.carrying) {
         if (gameState.elf.carrying.type === 'resource') {
-            carryingDisplay.textContent = `Carrying: ${gameState.elf.carrying.resource}`;
+            const capitalizedResource = gameState.elf.carrying.resource.charAt(0).toUpperCase() + gameState.elf.carrying.resource.slice(1);
+            carryingDisplay.textContent = `Carrying: ${capitalizedResource}`;
         } else if (gameState.elf.carrying.type === 'crafted') {
-            carryingDisplay.textContent = `Carrying: ${gameState.elf.carrying.toyName}`;
+            carryingDisplay.textContent = `Carrying: ${capitalizeToyName(gameState.elf.carrying.toyName)}`;
         }
         carryingDisplay.style.display = 'block';
     } else {
@@ -957,22 +974,40 @@ function initGame() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
     
+    // Add splash screen click-to-skip
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+        splashScreen.addEventListener('click', skipSplashScreen);
+    }
+    
     // Don't start until difficulty chosen
     
     console.log('Game initialized!');
     console.log('Controls: WASD or Arrow Keys to move, E to interact');
     console.log('Initial state:', gameState);
 }
+
+// Splash screen: skip to rules on click
+function skipSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    const rules = document.getElementById('rules-overlay');
+    
+    if (splash) {
+        splash.setAttribute('aria-hidden', 'true');
+    }
+    if (rules) {
+        rules.setAttribute('aria-hidden', 'false');
+    }
+}
+
 // Rules overlay: proceed to difficulty on Enter
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const rules = document.getElementById('rules-overlay');
-        if (rules && rules.style.display !== 'none') {
-            rules.style.display = 'none';
+        if (rules && rules.getAttribute('aria-hidden') === 'false') {
             rules.setAttribute('aria-hidden', 'true');
             const startOverlay = document.getElementById('start-overlay');
             if (startOverlay) {
-                startOverlay.style.display = 'flex';
                 startOverlay.setAttribute('aria-hidden', 'false');
             }
         }
