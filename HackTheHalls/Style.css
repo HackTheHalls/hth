@@ -563,16 +563,16 @@ div.elf {
 }
 
 /* Idle State */
-.elf.is-idle.is-right { animation: idle-right 1.2s linear infinite; }
-.elf.is-idle.is-left  { animation: idle-right 1.2s linear infinite; transform: scaleX(-1); transform-origin: center; }
-.elf.is-idle.is-up    { animation: idle-right 1.2s linear infinite; }
-.elf.is-idle.is-down  { animation: idle-right 1.2s linear infinite; }
+.elf.is-idle.is-right { animation: idle-right 1.5s linear infinite; }
+.elf.is-idle.is-left  { animation: idle-right 1.5s linear infinite; transform: scaleX(-1); transform-origin: center; }
+.elf.is-idle.is-up    { animation: idle-right 1.5s linear infinite; }
+.elf.is-idle.is-down  { animation: idle-right 1.5s linear infinite; }
 
 /* Walking State */
-.elf.is-walking.is-right { animation: walk-right 0.6s linear infinite; }
-.elf.is-walking.is-left  { animation: walk-right 0.6s linear infinite; transform: scaleX(-1); transform-origin: center; }
-.elf.is-walking.is-up    { animation: walk-up    0.6s linear infinite; }
-.elf.is-walking.is-down  { animation: walk-down  0.6s linear infinite; }
+.elf.is-walking.is-right { animation: walk-right 0.9s linear infinite; }
+.elf.is-walking.is-left  { animation: walk-right 0.9s linear infinite; transform: scaleX(-1); transform-origin: center; }
+.elf.is-walking.is-up    { animation: walk-up    0.9s linear infinite; }
+.elf.is-walking.is-down  { animation: walk-down  0.9s linear infinite; }
  
 @keyframes walk-right {
     0%   { background-image: url("imgs/Charcater/noItem/walkingRight/Frame1.png"); }
